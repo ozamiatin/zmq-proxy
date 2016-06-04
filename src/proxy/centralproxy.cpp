@@ -16,6 +16,7 @@
 
 
 #include "centralproxy.h"
+#include <easylogging++.h>
 
 
 using namespace zmqproxy;
@@ -28,11 +29,25 @@ CentralProxy::CentralProxy(const std::string& bind_address)
       m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub)),
       m_bind_address(bind_address)
 {
+    el::Logger* proxyLogger = el::Loggers::getLogger("CentralProxy");
+    CLOG(INFO, "CentralProxy") << "Starting central routing " << bind_address;
+
+//    try
+//    {
+//        cfg.readFile("/Users/ozamiatin/nova.conf");
+//    }
+//    catch(libconfig::ParseException& e)
+//    {
+//        LOG(ERROR) << e.getFile()
+//                   << "(" << e.getLine() << "): "
+//                   << e.getError();
+//    }
+
     m_fe_router.bind(bind_address);
 }
 
 
-void CentralProxy::poll_for_messages()
+void CentralProxy::pollForMessages()
 {
 
 }

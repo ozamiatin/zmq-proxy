@@ -27,7 +27,7 @@ LocalProxy::LocalProxy(const std::string& bind_address)
 }
 
 
-void LocalProxy::poll_for_messages()
+void LocalProxy::pollForMessages()
 {
 
 }

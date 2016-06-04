@@ -17,17 +17,42 @@
 
 #include <iostream>
 #include <thread>
+#include <easylogging++.h>
+#include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 
 #include "centralproxy.h"
 
 
+INITIALIZE_EASYLOGGINGPP
+
+
 int main(int argc, char* argv[])
 {
-    zmqproxy::CentralProxy proxy("tcp://*:19001");
+    START_EASYLOGGINGPP(argc, argv);
+    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} (%func): %msg");
+    el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 
-    while (true)
+
+    try
     {
-        proxy.poll_for_messages();
+        boost::property_tree::ptree conf;
+        boost::property_tree::ini_parser::read_ini("/Users/ozamiatin/zmq.conf", conf);
+
+        LOG(INFO) << std::boolalpha << "use_pub_sub=" << conf.get<bool>("DEFAULT.use_pub_sub");
+
+        zmqproxy::CentralProxy proxy("tcp://*:19001");
+
+        while (true)
+        {
+            proxy.pollForMessages();
+        }
+
+    }
+    catch(const std::exception& e)
+    {
+        LOG(ERROR) << e.what();
     }
 
 	return 0;

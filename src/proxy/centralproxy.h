@@ -36,7 +36,7 @@ namespace zmqproxy
     public:
 
         CentralProxy(const std::string& bind_address);
-        void poll_for_messages();
+        void pollForMessages();
     };
 }
 
