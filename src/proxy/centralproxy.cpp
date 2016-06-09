@@ -22,28 +22,15 @@
 using namespace zmqproxy;
 
 
-CentralProxy::CentralProxy(const std::string& bind_address)
-    : m_context(zmq::context_t(3)),
+CentralProxy::CentralProxy(const Configuration& conf)
+    : m_conf(conf),
+      m_context(zmq::context_t(3)),
       m_fe_router(zmq::socket_t(m_context, zmq::socket_type::router)),
       m_be_router(zmq::socket_t(m_context, zmq::socket_type::router)),
-      m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub)),
-      m_bind_address(bind_address)
+      m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub))
 {
-    el::Logger* proxyLogger = el::Loggers::getLogger("CentralProxy");
-    CLOG(INFO, "CentralProxy") << "Starting central routing " << bind_address;
-
-//    try
-//    {
-//        cfg.readFile("/Users/ozamiatin/nova.conf");
-//    }
-//    catch(libconfig::ParseException& e)
-//    {
-//        LOG(ERROR) << e.getFile()
-//                   << "(" << e.getLine() << "): "
-//                   << e.getError();
-//    }
-
-    m_fe_router.bind(bind_address);
+    el::Loggers::getLogger("CentralProxy");
+    CLOG(INFO, "CentralProxy") << "Starting central router ";
 }
 
 

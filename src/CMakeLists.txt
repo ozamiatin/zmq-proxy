@@ -25,13 +25,18 @@ project(zmq_proxy)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${ZEROMQCPP_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${ZEROMQCPP_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
-set(SOURCE_FILES "proxy/centralproxy.cpp"
+set(HEADER_FILES "common/matchmaker.h"
+                 "common/names.h")
+
+set(SOURCE_FILES "common/configuration.cpp"
+                 "common/matchmaker_redis.cpp"
+                 "proxy/centralproxy.cpp"
                  "proxy/localproxy.cpp"
                  "proxy/main.cpp")
 
 
-add_executable(zmq-proxy ${SOURCE_FILES})
-target_link_libraries(zmq-proxy zmq)
+add_executable(zmq-proxy ${HEADER_FILES} ${SOURCE_FILES})
+target_link_libraries(zmq-proxy zmq ${Boost_LIBRARIES} boost_system boost_thread-mt)

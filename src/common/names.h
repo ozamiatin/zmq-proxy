@@ -15,30 +15,36 @@
  */
 
 
-#ifndef __CENTRALPROXY_H__
-#define __CENTRALPROXY_H__
-
-
-#include "zmq.hpp"
+#ifndef __NAMES_H__
+#define __NAMES_H__
 
 
 namespace zmqproxy
 {
-    class Configuration;
-
-    class CentralProxy
+    enum class MessageType
     {
-        const Configuration& m_conf;
-        zmq::context_t m_context;
-        zmq::socket_t m_fe_router;
-        zmq::socket_t m_be_router;
-        zmq::socket_t m_publisher;
-
-    public:
-
-        CentralProxy(const Configuration& conf);
-        void pollForMessages();
+        Call    = 1,
+        Cast    = 2,
+        Fanout  = 3,
+        Notify  = 4,
+        Reply   = 5,
+        Ack     = 6
     };
+
+
+    inline bool is_multisend(MessageType msgType)
+    {
+        return msgType == MessageType::Fanout
+                || msgType == MessageType::Notify;
+    }
+
+
+    inline bool is_direct(MessageType msgType)
+    {
+        return msgType == MessageType::Call
+                || msgType == MessageType::Cast
+                || msgType == MessageType::Reply;
+    }
 }
 
 #endif

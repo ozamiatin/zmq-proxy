@@ -19,10 +19,9 @@
 #include <thread>
 #include <easylogging++.h>
 #include <boost/program_options.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/ini_parser.hpp>
 
 #include "centralproxy.h"
+#include "common/configuration.h"
 
 
 INITIALIZE_EASYLOGGINGPP
@@ -34,15 +33,22 @@ int main(int argc, char* argv[])
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} (%func): %msg");
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 
+    namespace po = boost::program_options;
+    po::options_description desc("ZeroMQ proxy service");
+    std::string config_file;
+    desc.add_options()
+      ("help,h", "Show help")
+      ("config-file,c", po::value<std::string>(&config_file), "ZeroMQ proxy configuration file");
+    po::variables_map vm;
 
     try
     {
-        boost::property_tree::ptree conf;
-        boost::property_tree::ini_parser::read_ini("/Users/ozamiatin/zmq.conf", conf);
+        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+        po::store(parsed, vm);
+        po::notify(vm);
 
-        LOG(INFO) << std::boolalpha << "use_pub_sub=" << conf.get<bool>("DEFAULT.use_pub_sub");
-
-        zmqproxy::CentralProxy proxy("tcp://*:19001");
+        zmqproxy::Configuration config(config_file);
+        zmqproxy::CentralProxy proxy(config);
 
         while (true)
         {
