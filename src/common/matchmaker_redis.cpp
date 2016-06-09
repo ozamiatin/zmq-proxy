@@ -23,25 +23,25 @@ MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
 
 void MatchmakerRedis::registerPublisher(const PublisherAddressT& host)
 {
-    addKey(host.first + "," + host.second);
+    addHost("PUBLISHERS", host.first + "," + host.second);
 }
 
 
 void MatchmakerRedis::unregisterPublisher(const PublisherAddressT& host)
 {
-    removeKey(host.first + "," + host.second);
+    removeHost("PUBLISHERS", host.first + "," + host.second);
 }
 
 
 void MatchmakerRedis::registerRouter(const std::string& hostname)
 {
-    addKey(hostname);
+    addHost("ROUTERS", hostname);
 }
 
 
 void MatchmakerRedis::unregisterRouter(const std::string& hostname)
 {
-    removeKey(hostname);
+    removeHost("ROUTERS", hostname);
 }
 
 
@@ -57,39 +57,31 @@ std::list<std::string> MatchmakerRedis::getRouters() const
 }
 
 
-void MatchmakerRedis::addKey(const std::string& key)
+void MatchmakerRedis::addHost(const std::string& key, const std::string& host)
 {
     if (!m_redis.is_connected())
         throw std::runtime_error("Redis server is not connected!");
 
-    std::vector<std::string> commands;
-    {
-        std::stringstream command;
-        command << "SADD PUBLISHERS " << "\"" << key << "\"";
-        commands.push_back(command.str());
-        CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << command.str();
-    }
-    {
-        std::stringstream command;
-        command << "EXPIRE PUBLISHERS " << m_conf.targetExpire();
-        commands.push_back(command.str());
-        CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << command.str();
-    }
+    CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << "SADD " << key << " " << host;
+    m_redis.send({"SADD", key, host}, [](const cpp_redis::reply& reply){
+        CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
+    });
 
-    m_redis.send(commands, [](const cpp_redis::reply& reply){
-        CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Commands execution failed!";
+    CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << "EXPIRE " << key;
+    m_redis.send({"EXPIRE", key, std::to_string(m_conf.targetExpire())},
+                 [](const cpp_redis::reply& reply){
+        CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
     });
 }
 
 
-void MatchmakerRedis::removeKey(const std::string& key)
+void MatchmakerRedis::removeHost(const std::string& key, const std::string& host)
 {
     if (!m_redis.is_connected())
         throw std::runtime_error("Redis server is not connected!");
 
-    std::stringstream command;
-    command << "SREM PUBLISHERS " << key;
-    m_redis.send(std::vector<std::string>{command.str()});
-
-    CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << command.str();
+    CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << "SREM " << key << " " << host;
+    m_redis.send({"SREM", key, host}, [](const cpp_redis::reply& reply){
+        CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
+    });
 }

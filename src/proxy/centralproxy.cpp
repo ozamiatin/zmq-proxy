@@ -36,12 +36,15 @@ CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
     CLOG(INFO, "CentralProxy") << "Starting central router ";
 
     m_matchmaker.registerPublisher(std::make_pair("127.0.0.1:35001", "127.0.0.1:35002"));
+    m_matchmaker.registerRouter("127.0.0.1:35003");
 }
 
 
 CentralProxy::~CentralProxy()
 {
+    CLOG(INFO, "CentralProxy") << "Destroy central router ";
     m_matchmaker.unregisterPublisher(std::make_pair("127.0.0.1:35001", "127.0.0.1:35002"));
+    m_matchmaker.unregisterRouter("127.0.0.1:35003");
 }
 
 

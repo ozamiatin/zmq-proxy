@@ -48,8 +48,8 @@ namespace zmqproxy
 
     private:
 
-        void addKey(const std::string& key);
-        void removeKey(const std::string& key);
+        void addHost(const std::string& key, const std::string& host);
+        void removeHost(const std::string& key, const std::string& host);
     };
 }
 
