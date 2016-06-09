@@ -16,7 +16,7 @@ enable_testing()
 set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 
-set(ZEROMQCPP_INCLUDE_DIR "~/3rd-party/cppzmq"
+set(INCLUDE_DIR "~/3rd-party/cppzmq"
                           "~/3rd-party/easyloggingpp/src")
 
 
@@ -25,7 +25,7 @@ project(zmq_proxy)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 include_directories(${Boost_INCLUDE_DIRS})
-include_directories(${ZEROMQCPP_INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
+include_directories(${INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
 set(HEADER_FILES "common/matchmaker.h"
@@ -39,4 +39,4 @@ set(SOURCE_FILES "common/configuration.cpp"
 
 
 add_executable(zmq-proxy ${HEADER_FILES} ${SOURCE_FILES})
-target_link_libraries(zmq-proxy zmq ${Boost_LIBRARIES} boost_system boost_thread-mt)
+target_link_libraries(zmq-proxy zmq ${Boost_LIBRARIES} boost_system boost_thread-mt cpp_redis)

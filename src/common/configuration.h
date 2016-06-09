@@ -49,7 +49,7 @@ namespace zmqproxy
         std::string host() const;
 
         std::string redisHost() const;
-        int redisPort() const;
+        unsigned int redisPort() const;
         std::string redisPassword() const;
 
         std::list<std::string> sentinelHosts() const;

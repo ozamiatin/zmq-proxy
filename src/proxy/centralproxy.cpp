@@ -15,22 +15,33 @@
  */
 
 
-#include "centralproxy.h"
 #include <easylogging++.h>
+
+#include "centralproxy.h"
+#include "common/matchmaker.h"
 
 
 using namespace zmqproxy;
 
 
-CentralProxy::CentralProxy(const Configuration& conf)
+CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
     : m_conf(conf),
+      m_matchmaker(matchmaker),
       m_context(zmq::context_t(3)),
-      m_fe_router(zmq::socket_t(m_context, zmq::socket_type::router)),
-      m_be_router(zmq::socket_t(m_context, zmq::socket_type::router)),
+      m_feRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
+      m_beRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
       m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub))
 {
     el::Loggers::getLogger("CentralProxy");
     CLOG(INFO, "CentralProxy") << "Starting central router ";
+
+    m_matchmaker.registerPublisher(std::make_pair("127.0.0.1:35001", "127.0.0.1:35002"));
+}
+
+
+CentralProxy::~CentralProxy()
+{
+    m_matchmaker.unregisterPublisher(std::make_pair("127.0.0.1:35001", "127.0.0.1:35002"));
 }
 
 

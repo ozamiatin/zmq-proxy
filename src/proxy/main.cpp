@@ -22,6 +22,7 @@
 
 #include "centralproxy.h"
 #include "common/configuration.h"
+#include "common/matchmaker_redis.h"
 
 
 INITIALIZE_EASYLOGGINGPP
@@ -30,25 +31,31 @@ INITIALIZE_EASYLOGGINGPP
 int main(int argc, char* argv[])
 {
     START_EASYLOGGINGPP(argc, argv);
-    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format, "%level %datetime{%H:%m:%s} (%func): %msg");
+    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
+                                       "%level %datetime{%H:%m:%s} (%func): %msg");
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
-    std::string config_file;
+    std::string configFile;
+
     desc.add_options()
       ("help,h", "Show help")
-      ("config-file,c", po::value<std::string>(&config_file), "ZeroMQ proxy configuration file");
+      ("config-file,c", po::value<std::string>(&configFile),
+       "ZeroMQ proxy configuration file");
+
     po::variables_map vm;
 
     try
     {
-        po::parsed_options parsed = po::command_line_parser(argc, argv).options(desc).allow_unregistered().run();
+        po::parsed_options parsed = po::command_line_parser(argc, argv)
+                .options(desc).allow_unregistered().run();
         po::store(parsed, vm);
         po::notify(vm);
 
-        zmqproxy::Configuration config(config_file);
-        zmqproxy::CentralProxy proxy(config);
+        zmqproxy::Configuration config(configFile);
+        zmqproxy::MatchmakerRedis matchmakerRedis(config);
+        zmqproxy::CentralProxy proxy(config, matchmakerRedis);
 
         while (true)
         {

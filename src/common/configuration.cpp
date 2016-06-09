@@ -14,7 +14,7 @@ Configuration::Configuration(const std::string& configFile)
       m_targetExpire(300),
       m_targetUpdate(120),
       m_host(boost::asio::ip::host_name()),
-      m_redisHost(m_host),
+      m_redisHost("127.0.0.1"),
       m_redisPort(6379),
       m_sentinelWaitTimeout(5000),
       m_sentinelCheckTimeout(60000),
@@ -86,7 +86,7 @@ std::string Configuration::redisHost() const
 }
 
 
-int Configuration::redisPort() const
+unsigned int Configuration::redisPort() const
 {
     return m_redisPort;
 }

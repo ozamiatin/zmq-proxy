@@ -25,18 +25,22 @@
 namespace zmqproxy
 {
     class Configuration;
+    class Matchmaker;
 
     class CentralProxy
     {
         const Configuration& m_conf;
+        Matchmaker& m_matchmaker;
         zmq::context_t m_context;
-        zmq::socket_t m_fe_router;
-        zmq::socket_t m_be_router;
+        zmq::socket_t m_feRouter;
+        zmq::socket_t m_beRouter;
         zmq::socket_t m_publisher;
+
 
     public:
 
-        CentralProxy(const Configuration& conf);
+        CentralProxy(const Configuration& conf, Matchmaker& matchmaker);
+        ~CentralProxy();
         void pollForMessages();
     };
 }
