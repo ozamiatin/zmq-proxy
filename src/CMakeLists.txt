@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 
 set(INCLUDE_DIR "~/3rd-party/cppzmq"
-                          "~/3rd-party/easyloggingpp/src")
+                "~/3rd-party/easyloggingpp/src")
 
 
 project(zmq_proxy)
