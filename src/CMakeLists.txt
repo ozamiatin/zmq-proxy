@@ -13,7 +13,7 @@
 cmake_minimum_required(VERSION 2.8.1)
 enable_testing()
 
-set(CMAKE_CXX_FLAGS "-std=c++11 -stdlib=libc++")
+add_compile_options(-std=c++11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
 
 set(INCLUDE_DIR "~/3rd-party/cppzmq"

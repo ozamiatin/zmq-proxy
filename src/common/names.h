@@ -45,6 +45,9 @@ namespace zmqproxy
                 || msgType == MessageType::Cast
                 || msgType == MessageType::Reply;
     }
+
+    const char* PUBLISHERS_KEY      = "PUBLISHERS";
+    const char* ROUTERS_KEY         = "ROUTERS";
 }
 
 #endif

@@ -14,7 +14,10 @@
  *   under the License.
  */
 
+
 #include "matchmaker_redis.h"
+#include "names.h"
+
 
 #include <sstream>
 #include <easylogging++.h>
@@ -39,25 +42,25 @@ MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
 
 void MatchmakerRedis::registerPublisher(const PublisherAddressT& host)
 {
-    addHost("PUBLISHERS", host.first + "," + host.second);
+    addHost(PUBLISHERS_KEY, host.first + "," + host.second);
 }
 
 
 void MatchmakerRedis::unregisterPublisher(const PublisherAddressT& host)
 {
-    removeHost("PUBLISHERS", host.first + "," + host.second);
+    removeHost(PUBLISHERS_KEY, host.first + "," + host.second);
 }
 
 
 void MatchmakerRedis::registerRouter(const std::string& hostname)
 {
-    addHost("ROUTERS", hostname);
+    addHost(ROUTERS_KEY, hostname);
 }
 
 
 void MatchmakerRedis::unregisterRouter(const std::string& hostname)
 {
-    removeHost("ROUTERS", hostname);
+    removeHost(ROUTERS_KEY, hostname);
 }
 
 
