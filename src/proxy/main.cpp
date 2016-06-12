@@ -15,6 +15,8 @@
  */
 
 
+#include <csetjmp>
+#include <csignal>
 #include <iostream>
 #include <thread>
 #include <easylogging++.h>
@@ -28,8 +30,48 @@
 INITIALIZE_EASYLOGGINGPP
 
 
+namespace zmqproxy
+{
+    class SystemExit : public std::runtime_error
+    {
+    public:
+        SystemExit()
+            : std::runtime_error("Program terminated by SIGINT")
+        {
+
+        }
+    };
+}
+
+
+std::jmp_buf gJumpBuffer;
+
+
+void signal_handler(int sig)
+{
+    //std::signal(signal_handler, sig);
+    std::longjmp(gJumpBuffer, sig);
+}
+
+
+void init_signal_handling()
+{
+    std::signal(SIGINT, signal_handler);
+    std::signal(SIGKILL, signal_handler);
+    std::signal(SIGABRT, signal_handler);
+    std::signal(SIGTERM, signal_handler);
+
+    int sig = 0;
+    if ((sig = setjmp(gJumpBuffer)) != 0)
+    {
+        throw zmqproxy::SystemExit();
+    }
+}
+
+
 int main(int argc, char* argv[])
 {
+    init_signal_handling();
     START_EASYLOGGINGPP(argc, argv);
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "%level %datetime{%H:%m:%s} (%func): %msg");
@@ -61,7 +103,6 @@ int main(int argc, char* argv[])
         {
             proxy.pollForMessages();
         }
-
     }
     catch(const std::exception& e)
     {
