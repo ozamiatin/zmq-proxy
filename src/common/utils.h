@@ -15,24 +15,24 @@
  */
 
 
-#ifndef __ZMQ_PROXY_NAMES_H__
-#define __ZMQ_PROXY_NAMES_H__
+#ifndef __ZMQ_PROXY_UTILS_HPP__
+#define __ZMQ_PROXY_UTILS_HPP__
+
+
+#include "zmq.hpp"
+#include "names.h"
 
 
 namespace zmqproxy
 {
-    enum class MessageType
-    {
-        Call    = 1,
-        Cast    = 2,
-        Fanout  = 3,
-        Notify  = 4,
-        Reply   = 5,
-        Ack     = 6
-    };
 
-    static const char* PUBLISHERS_KEY      = "PUBLISHERS";
-    static const char* ROUTERS_KEY         = "ROUTERS";
+    std::string getString(const zmq::message_t& part);
+    int getInteger(const zmq::message_t& part);
+    MessageType getMessageType(const zmq::message_t& part);
+    std::string toString(MessageType msgType);
+    bool isMultisend(MessageType msgType);
+    bool isDirect(MessageType msgType);
+
 }
 
 #endif

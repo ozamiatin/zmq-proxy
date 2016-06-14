@@ -15,12 +15,14 @@
  */
 
 
+#include "centralproxy.h"
+
 #include <easylogging++.h>
 #include <zmq_addon.hpp>
 
 #include "common/configuration.h"
-#include "centralproxy.h"
 #include "common/matchmaker.h"
+#include "common/utils.h"
 
 
 using namespace zmqproxy;
@@ -65,9 +67,6 @@ CentralProxy::~CentralProxy()
 
 void CentralProxy::pollForMessages()
 {
-//    void* feSocket = *m_feRouter;
-//    void* beSocket = *m_beRouter;
-
     //  Initialize poll set
     zmq::pollitem_t items [] = {
         { static_cast<void *>(m_feRouter), 0, ZMQ_POLLIN, 0 },
@@ -94,5 +93,24 @@ void CentralProxy::receiveInRequest(zmq::socket_t& socket)
     CLOG(INFO, "CentralProxy") << "Message pending ";
     zmq::multipart_t message;
     message.recv(socket);
+
     CLOG(INFO, "CentralProxy") << "Received: " << message.str();
+
+    zmq::message_t replyId = message.pop();
+    message.pop(); // Empty
+
+    auto messageType = getMessageType(message.pop());
+    CLOG(INFO, "CentralProxy") << "Message type: " << toString(messageType);
+
+    if (isDirect(messageType))
+    {
+        CLOG(INFO, "CentralProxy") << "Direct type handling";
+    }
+    else if (isMultisend(messageType))
+    {
+        CLOG(INFO, "CentralProxy") << "Multisend type handling";
+    }
+
+    auto routingKey = getString(message.pop());
+    CLOG(INFO, "CentralProxy") << "Routing key: " << routingKey;
 }

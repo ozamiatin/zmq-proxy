@@ -27,7 +27,7 @@ using namespace zmqproxy;
 
 Configuration::Configuration(const std::string& configFile)
     : m_usePubSub(true),
-      m_targetExpire(300),
+      m_targetExpire(-2),
       m_targetUpdate(120),
       m_host(boost::asio::ip::host_name()),
       m_redisHost("127.0.0.1"),
@@ -36,35 +36,37 @@ Configuration::Configuration(const std::string& configFile)
       m_sentinelCheckTimeout(60000),
       m_sentinelSocketTimeout(10000)
 {
-    try
+    if (!configFile.empty())
     {
-        boost::property_tree::ptree conf;
-        boost::property_tree::ini_parser::read_ini(configFile, conf);
+        try
+        {
+            boost::property_tree::ptree conf;
+            boost::property_tree::ini_parser::read_ini(configFile, conf);
 
-        m_usePubSub = conf.get<bool>("DEFAULT.use_pub_sub");
-        m_targetExpire = conf.get<int>("DEFAULT.zmq_target_expire");
-        m_targetUpdate = conf.get<int>("DEFAULT.zmq_target_update");
-        m_host = conf.get<std::string>("DEFAULT.rpc_zmq_host");
+            m_usePubSub = conf.get<bool>("DEFAULT.use_pub_sub");
+            m_targetExpire = conf.get<int>("DEFAULT.zmq_target_expire");
+            m_targetUpdate = conf.get<int>("DEFAULT.zmq_target_update");
+            m_host = conf.get<std::string>("DEFAULT.rpc_zmq_host");
 
-        m_redisHost = conf.get<std::string>("matchmaker_redis.host");
-        m_redisPort = conf.get<int>("matchmaker_redis.port");
-        m_redisPassword = conf.get<std::string>("matchmaker_redis.password");
+            m_redisHost = conf.get<std::string>("matchmaker_redis.host");
+            m_redisPort = conf.get<int>("matchmaker_redis.port");
+            m_redisPassword = conf.get<std::string>("matchmaker_redis.password");
 
-    //    m_sentinelHosts;
-    //    m_sentinelGroupName;
-    //    m_sentinelWaitTimeout;
-    //    m_sentinelCheckTimeout;
-    //    m_sentinelSocketTimeout;
+        //    m_sentinelHosts;
+        //    m_sentinelGroupName;
+        //    m_sentinelWaitTimeout;
+        //    m_sentinelCheckTimeout;
+        //    m_sentinelSocketTimeout;
 
 
-        LOG(INFO) << "Read configuration from '" << configFile << "'";
+            LOG(INFO) << "Read configuration from '" << configFile << "'";
+        }
+        catch(const std::exception& e)
+        {
+            LOG(WARNING) << "Unrecognized configuration file '"
+                         << configFile << "', used default configuration.";
+        }
     }
-    catch(const std::exception& e)
-    {
-        LOG(WARNING) << "Unrecognized configuration file '"
-                     << configFile << "', used default configuration.";
-    }
-
     LOG(INFO) << std::boolalpha << "use_pub_sub=" << m_usePubSub;
     LOG(INFO) << "zmq_target_expire=" << m_targetExpire;
     LOG(INFO) << "zmq_target_update=" << m_targetUpdate;

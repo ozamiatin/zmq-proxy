@@ -86,11 +86,14 @@ void MatchmakerRedis::addHost(const std::string& key, const std::string& host)
         CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
     });
 
-    CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << "EXPIRE " << key;
-    m_redis.send({"EXPIRE", key, std::to_string(m_conf.targetExpire())},
-                 [](const cpp_redis::reply& reply){
-        CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
-    });
+    if (m_conf.targetExpire() >= 0)
+    {
+        CLOG(DEBUG, "MatchmakerRedis") << "Executing: " << "EXPIRE " << key;
+        m_redis.send({"EXPIRE", key, std::to_string(m_conf.targetExpire())},
+                     [](const cpp_redis::reply& reply){
+            CLOG_IF(reply.is_error(), ERROR, "MatchmakerRedis") << "Command execution failed!";
+        });
+    }
 }
 
 
