@@ -33,6 +33,8 @@ namespace zmqproxy
     bool isMultisend(MessageType msgType);
     bool isDirect(MessageType msgType);
 
+    void sendString(zmq::socket_t& socket, const std::string& string, int flags = 0);
+
 }
 
 #endif

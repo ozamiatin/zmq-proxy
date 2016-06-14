@@ -49,7 +49,7 @@ namespace zmqproxy
         CentralProxy(const Configuration& conf, Matchmaker& matchmaker);
         ~CentralProxy();
         void pollForMessages();
-        void receiveInRequest(zmq::socket_t& socket);
+        void redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
     };
 }
 

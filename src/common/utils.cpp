@@ -78,4 +78,15 @@ bool isDirect(MessageType msgType)
             || msgType == MessageType::Reply;
 }
 
+
+void sendString(zmq::socket_t& socket, const std::string& string, int flags)
+{
+    zmq::message_t message(string.size());
+    memcpy (message.data(), string.data(), string.size());
+
+    bool rc = socket.send (message, flags);
+    if (!rc)
+        throw zmq::error_t();
+}
+
 }
