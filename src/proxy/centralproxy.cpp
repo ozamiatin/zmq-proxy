@@ -89,13 +89,15 @@ void CentralProxy::pollForMessages()
 void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
 {
 //    CLOG(DEBUG, "CentralProxy") << "Message pending ";
-    zmq::multipart_t message;
-    message.recv(socketFe);
 
-    zmq::message_t replyId = message.pop();
-    message.pop(); // Empty
+    zmq::message_t replyId;
+    socketFe.recv(&replyId);
 
-    zmq::message_t msgType = message.pop();
+    zmq::message_t empty;
+    socketFe.recv(&empty);
+
+    zmq::message_t msgType;
+    socketFe.recv(&msgType);
     auto messageType = getMessageType(msgType);
 //    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
 
@@ -103,15 +105,28 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     {
 //        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
 
-        auto routingKey = getString(message.pop());
+        zmq::message_t routingKey;
+        socketFe.recv(&routingKey);
+        socketBe.send(routingKey, ZMQ_SNDMORE);
+
+        zmq::message_t routingKey;
+        sendString(socketBe, "", ZMQ_SNDMORE);
+        socketBe.send(replyId, ZMQ_SNDMORE);
+        socketBe.send(msgType, ZMQ_SNDMORE);
+
+//        auto routingKey = getString(message.pop());
 //        CLOG(DEBUG, "CentralProxy") << "Routing key: " << routingKey;
-        auto messageId = getString(message.pop());
+//        auto messageId = getString(message.pop());
 //        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << messageId;
 
         sendString(socketBe, routingKey, ZMQ_SNDMORE);
         sendString(socketBe, "", ZMQ_SNDMORE);
         socketBe.send(replyId, ZMQ_SNDMORE);
         socketBe.send(msgType, ZMQ_SNDMORE);
+
+        zmq::message_t messageId;
+        socketFe.recv()
+
         sendString(socketBe, messageId, ZMQ_SNDMORE);
         message.send(socketBe);
     }
