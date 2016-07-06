@@ -74,47 +74,45 @@ void CentralProxy::pollForMessages()
     };
     //  Process messages from both sockets
     while (1) {
-        CLOG(DEBUG, "CentralProxy") << "Start polling messages";
         zmq::poll (&items [0], 2, -1);
 
         if (items [0].revents & ZMQ_POLLIN) {
             redirectInRequest(m_feRouter, m_beRouter);
         }
-//        if (items [1].revents & ZMQ_POLLIN) {
-//            redirectInRequest(m_beRouter, m_feRouter);
-//        }
+        if (items [1].revents & ZMQ_POLLIN) {
+            redirectInRequest(m_beRouter, m_feRouter);
+        }
     }
 }
 
 
 void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
 {
-    CLOG(DEBUG, "CentralProxy") << "Message pending ";
+//    CLOG(DEBUG, "CentralProxy") << "Message pending ";
     zmq::multipart_t message;
     message.recv(socketFe);
-
-    CLOG(DEBUG, "CentralProxy") << "Received: " << message.str();
 
     zmq::message_t replyId = message.pop();
     message.pop(); // Empty
 
     zmq::message_t msgType = message.pop();
     auto messageType = getMessageType(msgType);
-    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
+//    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
 
     if (isDirect(messageType))
     {
-        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
+//        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
 
         auto routingKey = getString(message.pop());
-        CLOG(DEBUG, "CentralProxy") << "Routing key: " << routingKey;
+//        CLOG(DEBUG, "CentralProxy") << "Routing key: " << routingKey;
         auto messageId = getString(message.pop());
-        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << messageId;
+//        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << messageId;
 
         sendString(socketBe, routingKey, ZMQ_SNDMORE);
         sendString(socketBe, "", ZMQ_SNDMORE);
         socketBe.send(replyId, ZMQ_SNDMORE);
         socketBe.send(msgType, ZMQ_SNDMORE);
+        sendString(socketBe, messageId, ZMQ_SNDMORE);
         message.send(socketBe);
     }
     else if (isMultisend(messageType))

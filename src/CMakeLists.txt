@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.8.1)
 enable_testing()
 
 add_compile_options(-std=c++11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -O0")
 
 set(INCLUDE_DIR "~/3rd-party/cppzmq"
                 "~/3rd-party/easyloggingpp/src")
