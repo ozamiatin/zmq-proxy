@@ -73,17 +73,22 @@ void CentralProxy::pollForMessages()
     //  Initialize poll set
     zmq::pollitem_t items [] = {
         { static_cast<void *>(m_feRouter), 0, ZMQ_POLLIN, 0 },
-        { static_cast<void *>(m_feRouter), 0, ZMQ_POLLIN, 0 }
+        { static_cast<void *>(m_beRouter), 0, ZMQ_POLLIN, 0 }
     };
     //  Process messages from both sockets
     while (1) {
         zmq::poll (&items [0], 2, -1);
+        CLOG(DEBUG, "CentralProxy") << "Message pending";
 
         if (items [0].revents & ZMQ_POLLIN) {
+            CLOG(DEBUG, "CentralProxy") << "FE message";
             redirectInRequest(m_feRouter, m_beRouter);
+            CLOG(DEBUG, "CentralProxy") << "FE message redirected";
         }
         if (items [1].revents & ZMQ_POLLIN) {
+            CLOG(DEBUG, "CentralProxy") << "BE message";
             redirectInRequest(m_beRouter, m_feRouter);
+            CLOG(DEBUG, "CentralProxy") << "BE message redirected";
         }
     }
 }
@@ -108,17 +113,17 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
         zmq::message_t routingKey;
         socketFe.recv(&routingKey);
 //        CLOG(DEBUG, "CentralProxy") << "Routing key: " << getString(routingKey);
-        socketBe.send(routingKey, ZMQ_SNDMORE);
+        socketBe.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 
-        sendString(socketBe, EMPTY, ZMQ_SNDMORE);
+        sendString(socketBe, EMPTY, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 //        socketBe.send(empty, ZMQ_SNDMORE);
-        socketBe.send(replyId, ZMQ_SNDMORE);
-        socketBe.send(msgType, ZMQ_SNDMORE);
+        socketBe.send(replyId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        socketBe.send(msgType, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 
         zmq::message_t messageId;
         socketFe.recv(&messageId);
 //        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << getString(messageId);
-        socketBe.send(messageId, ZMQ_SNDMORE);
+        socketBe.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 
         bool more = true;
         int i = 0;
@@ -128,7 +133,7 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
             socketFe.recv(&msg);
             more = msg.more();
             CLOG(DEBUG, "CentralProxy") << "Message part " << i++;
-            socketBe.send(msg, more ? ZMQ_SNDMORE : 0);
+            socketBe.send(msg, more ? ZMQ_SNDMORE | ZMQ_NOBLOCK : ZMQ_NOBLOCK);
         }
         CLOG(DEBUG, "CentralProxy") << "Message sent ...";
     }
