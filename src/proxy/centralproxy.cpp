@@ -28,6 +28,9 @@
 using namespace zmqproxy;
 
 
+const std::string EMPTY = "";
+
+
 CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
     : m_conf(conf),
       m_matchmaker(matchmaker),
@@ -88,8 +91,6 @@ void CentralProxy::pollForMessages()
 
 void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
 {
-//    CLOG(DEBUG, "CentralProxy") << "Message pending ";
-
     zmq::message_t replyId;
     socketFe.recv(&replyId);
 
@@ -99,36 +100,37 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     zmq::message_t msgType;
     socketFe.recv(&msgType);
     auto messageType = getMessageType(msgType);
-//    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
+    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
 
     if (isDirect(messageType))
     {
-//        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
-
+        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
         zmq::message_t routingKey;
         socketFe.recv(&routingKey);
+//        CLOG(DEBUG, "CentralProxy") << "Routing key: " << getString(routingKey);
         socketBe.send(routingKey, ZMQ_SNDMORE);
 
-        zmq::message_t routingKey;
-        sendString(socketBe, "", ZMQ_SNDMORE);
-        socketBe.send(replyId, ZMQ_SNDMORE);
-        socketBe.send(msgType, ZMQ_SNDMORE);
-
-//        auto routingKey = getString(message.pop());
-//        CLOG(DEBUG, "CentralProxy") << "Routing key: " << routingKey;
-//        auto messageId = getString(message.pop());
-//        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << messageId;
-
-        sendString(socketBe, routingKey, ZMQ_SNDMORE);
-        sendString(socketBe, "", ZMQ_SNDMORE);
+        sendString(socketBe, EMPTY, ZMQ_SNDMORE);
+//        socketBe.send(empty, ZMQ_SNDMORE);
         socketBe.send(replyId, ZMQ_SNDMORE);
         socketBe.send(msgType, ZMQ_SNDMORE);
 
         zmq::message_t messageId;
-        socketFe.recv()
+        socketFe.recv(&messageId);
+//        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << getString(messageId);
+        socketBe.send(messageId, ZMQ_SNDMORE);
 
-        sendString(socketBe, messageId, ZMQ_SNDMORE);
-        message.send(socketBe);
+        bool more = true;
+        int i = 0;
+        zmq::message_t msg;
+        while (more)
+        {
+            socketFe.recv(&msg);
+            more = msg.more();
+            CLOG(DEBUG, "CentralProxy") << "Message part " << i++;
+            socketBe.send(msg, more ? ZMQ_SNDMORE : 0);
+        }
+        CLOG(DEBUG, "CentralProxy") << "Message sent ...";
     }
     else if (isMultisend(messageType))
     {
