@@ -45,11 +45,13 @@ namespace zmqproxy
 
 
     public:
-
         CentralProxy(const Configuration& conf, Matchmaker& matchmaker);
         ~CentralProxy();
         void pollForMessages();
+
+    private:
         void redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
+        void dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
     };
 }
 

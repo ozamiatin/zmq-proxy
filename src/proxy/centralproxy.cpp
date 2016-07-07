@@ -107,38 +107,46 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     auto messageType = getMessageType(msgType);
     CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
 
+    zmq::message_t routingKey;
+    socketFe.recv(&routingKey);
+//  CLOG(DEBUG, "CentralProxy") << "Routing key: " << getString(routingKey);
+
+    zmq::message_t messageId;
+    socketFe.recv(&messageId);
+//  CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << getString(messageId);
+
     if (isDirect(messageType))
     {
         CLOG(DEBUG, "CentralProxy") << "Direct type handling";
-        zmq::message_t routingKey;
-        socketFe.recv(&routingKey);
-//        CLOG(DEBUG, "CentralProxy") << "Routing key: " << getString(routingKey);
         socketBe.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 
         sendString(socketBe, EMPTY, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-//        socketBe.send(empty, ZMQ_SNDMORE);
         socketBe.send(replyId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
         socketBe.send(msgType, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-
-        zmq::message_t messageId;
-        socketFe.recv(&messageId);
-//        CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << getString(messageId);
         socketBe.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-
-        bool more = true;
-        int i = 0;
-        zmq::message_t msg;
-        while (more)
-        {
-            socketFe.recv(&msg);
-            more = msg.more();
-            CLOG(DEBUG, "CentralProxy") << "Message part " << i++;
-            socketBe.send(msg, more ? ZMQ_SNDMORE | ZMQ_NOBLOCK : ZMQ_NOBLOCK);
-        }
-        CLOG(DEBUG, "CentralProxy") << "Message sent ...";
+        dispatchMessageTail(socketFe, socketBe);
     }
     else if (isMultisend(messageType))
     {
         CLOG(DEBUG, "CentralProxy") << "Multisend type handling";
+        m_publisher.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        m_publisher.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        dispatchMessageTail(socketFe, m_publisher);
     }
+}
+
+
+void CentralProxy::dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
+{
+    bool more = true;
+    int i = 0;
+    zmq::message_t msg;
+    while (more)
+    {
+        socketFe.recv(&msg);
+        more = msg.more();
+        CLOG(DEBUG, "CentralProxy") << "Message part " << i++;
+        socketBe.send(msg, more ? ZMQ_SNDMORE | ZMQ_NOBLOCK : ZMQ_NOBLOCK);
+    }
+    CLOG(DEBUG, "CentralProxy") << "Message sent ...";
 }
