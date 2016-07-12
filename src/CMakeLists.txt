@@ -17,7 +17,8 @@ add_compile_options(-std=c++11)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -pedantic -Wextra -O2")
 
 set(INCLUDE_DIR "~/3rd-party/cppzmq"
-                "~/3rd-party/easyloggingpp/src")
+                "~/3rd-party/easyloggingpp/src"
+                "~/3rd-party/cpp_redis/includes")
 
 
 project(zmq_proxy)
