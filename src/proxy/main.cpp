@@ -49,7 +49,6 @@ std::jmp_buf gJumpBuffer;
 
 void signal_handler(int sig)
 {
-    //std::signal(signal_handler, sig);
     std::longjmp(gJumpBuffer, sig);
 }
 
@@ -80,11 +79,24 @@ int main(int argc, char* argv[])
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
     std::string configFile;
+    unsigned int frontendPort = 0;
+    unsigned int backendPort = 0;
+    unsigned int publisherPort = 0;
 
     desc.add_options()
       ("help,h", "Show help")
+
       ("config-file,c", po::value<std::string>(&configFile),
-       "ZeroMQ proxy configuration file");
+                "ZeroMQ proxy configuration file")
+
+      ("frontend-port,fe", po::value<unsigned int>(&frontendPort),
+                "Frontend ROUTER port. RPC clients connect to frontend")
+
+      ("backend-port,be", po::value<unsigned int>(&backendPort),
+                "Backend ROUTER port. RPC servers connect to backend.")
+
+      ("publisher-port,pub", po::value<unsigned int>(&publisherPort),
+                "Publisher port. Fanout messages go over this port if pub/sub is used.");
 
     po::variables_map vm;
 
@@ -96,6 +108,16 @@ int main(int argc, char* argv[])
         po::notify(vm);
 
         zmqproxy::Configuration config(configFile);
+
+        if (frontendPort)
+            config.setFrontendPort(frontendPort);
+
+        if (backendPort)
+            config.setBackendPort(backendPort);
+
+        if (publisherPort)
+            config.setPublisherPort(publisherPort);
+
         zmqproxy::MatchmakerRedis matchmakerRedis(config);
         zmqproxy::CentralProxy proxy(config, matchmakerRedis);
 

@@ -41,6 +41,10 @@ namespace zmqproxy
         int m_sentinelCheckTimeout;
         int m_sentinelSocketTimeout;
 
+        unsigned int m_frontendPort;
+        unsigned int m_backendPort;
+        unsigned int m_publisherPort;
+
     public:
         Configuration(const std::string& configFile);
         bool usePubSub() const;
@@ -57,6 +61,14 @@ namespace zmqproxy
         int sentinelWaitTimeout() const;
         int sentinelCheckTimeout() const;
         int sentinelSocketTimeout() const;
+
+        void setFrontendPort(unsigned int port);
+        void setBackendPort(unsigned int port);
+        void setPublisherPort(unsigned int port);
+
+        unsigned int getFrontendPort() const;
+        unsigned int getBackendPort() const;
+        unsigned int getPublisherPort() const;
     };
 }
 

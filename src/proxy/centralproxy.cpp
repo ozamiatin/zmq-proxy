@@ -38,22 +38,19 @@ CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
       m_feRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
       m_beRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
       m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub)),
-      m_fePort(35001),
-      m_bePort(35002),
-      m_publisherPort(35003),
-      m_feRouterAddress(conf.host() + ":" + std::to_string(m_fePort)),
-      m_beRouterAddress(conf.host() + ":" + std::to_string(m_bePort)),
-      m_publisherAddress(conf.host() + ":" + std::to_string(m_publisherPort))
+      m_feRouterAddress(conf.host() + ":" + std::to_string(conf.getFrontendPort())),
+      m_beRouterAddress(conf.host() + ":" + std::to_string(conf.getBackendPort())),
+      m_publisherAddress(conf.host() + ":" + std::to_string(conf.getPublisherPort()))
 {
     el::Loggers::getLogger("CentralProxy");
     CLOG(INFO, "CentralProxy") << "Starting central router ";
 
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(m_fePort);
-    m_feRouter.bind("tcp://*:" + std::to_string(m_fePort));
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(m_bePort);
-    m_beRouter.bind("tcp://*:" + std::to_string(m_bePort));
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(m_publisherPort);
-    m_publisher.bind("tcp://*:" + std::to_string(m_publisherPort));
+    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
+    m_feRouter.bind("tcp://*:" + std::to_string(conf.getFrontendPort()));
+    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
+    m_beRouter.bind("tcp://*:" + std::to_string(conf.getBackendPort()));
+    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
+    m_publisher.bind("tcp://*:" + std::to_string(conf.getPublisherPort()));
 
     m_matchmaker.registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
     m_matchmaker.registerRouter(m_beRouterAddress);

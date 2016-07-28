@@ -36,9 +36,6 @@ namespace zmqproxy
         zmq::socket_t m_beRouter;
         zmq::socket_t m_publisher;
 
-        unsigned int m_fePort;
-        unsigned int m_bePort;
-        unsigned int m_publisherPort;
         std::string m_feRouterAddress;
         std::string m_beRouterAddress;
         std::string m_publisherAddress;

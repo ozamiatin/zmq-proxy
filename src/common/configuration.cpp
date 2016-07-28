@@ -34,7 +34,10 @@ Configuration::Configuration(const std::string& configFile)
       m_redisPort(6379),
       m_sentinelWaitTimeout(5000),
       m_sentinelCheckTimeout(60000),
-      m_sentinelSocketTimeout(10000)
+      m_sentinelSocketTimeout(10000),
+      m_frontendPort(0),
+      m_backendPort(0),
+      m_publisherPort(0)
 {
     if (!configFile.empty())
     {
@@ -143,4 +146,40 @@ int Configuration::sentinelCheckTimeout() const
 int Configuration::sentinelSocketTimeout() const
 {
     return m_sentinelSocketTimeout;
+}
+
+
+void Configuration::setFrontendPort(unsigned int port)
+{
+    m_frontendPort = port;
+}
+
+
+void Configuration::setBackendPort(unsigned int port)
+{
+    m_backendPort = port;
+}
+
+
+void Configuration::setPublisherPort(unsigned int port)
+{
+    m_publisherPort = port;
+}
+
+
+unsigned int Configuration::getFrontendPort() const
+{
+    return m_frontendPort;
+}
+
+
+unsigned int Configuration::getBackendPort() const
+{
+    return m_backendPort;
+}
+
+
+unsigned int Configuration::getPublisherPort() const
+{
+    return m_publisherPort;
 }
