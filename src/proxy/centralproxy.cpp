@@ -31,9 +31,9 @@ using namespace zmqproxy;
 const std::string EMPTY = "";
 
 
-CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
+CentralProxy::CentralProxy(const Configuration& conf)
     : m_conf(conf),
-      m_matchmaker(matchmaker),
+      m_matchmaker(Matchmaker::create(conf)),
       m_context(zmq::context_t(3)),
       m_feRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
       m_beRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
@@ -52,16 +52,38 @@ CentralProxy::CentralProxy(const Configuration& conf, Matchmaker& matchmaker)
     CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
     m_publisher.bind("tcp://*:" + std::to_string(conf.getPublisherPort()));
 
-    m_matchmaker.registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
-    m_matchmaker.registerRouter(m_beRouterAddress);
+    m_stopUpdates.store(false);
+    m_matchmakerUpdater.reset(new std::thread(&CentralProxy::updateMatchmaker, this));
+}
+
+
+void CentralProxy::updateMatchmaker()
+{
+    while (!m_stopUpdates)
+    {
+        m_matchmaker->registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
+        m_matchmaker->registerRouter(m_beRouterAddress);
+
+        CLOG(INFO, "CentralProxy") << "[PUB:" << std::to_string(m_conf.getPublisherPort())
+                                   << ", ROUTER:"
+                                   << std::to_string(m_conf.getFrontendPort()) << "] Update PUB publisher";
+
+        CLOG(INFO, "CentralProxy") << "[Backend ROUTER:"
+                                   << std::to_string(m_conf.getPublisherPort())
+                                   << "] Update ROUTER";
+
+        std::this_thread::sleep_for(std::chrono::seconds(m_conf.targetUpdate()));
+    }
 }
 
 
 CentralProxy::~CentralProxy()
 {
+    m_stopUpdates.store(true);
+
     CLOG(INFO, "CentralProxy") << "Destroy central router ";
-    m_matchmaker.unregisterPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
-    m_matchmaker.unregisterRouter(m_beRouterAddress);
+    m_matchmaker->unregisterPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
+    m_matchmaker->unregisterRouter(m_beRouterAddress);
 }
 
 

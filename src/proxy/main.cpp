@@ -70,8 +70,8 @@ void init_signal_handling()
 
 int main(int argc, char* argv[])
 {
-    init_signal_handling();
     START_EASYLOGGINGPP(argc, argv);
+    init_signal_handling();
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
                                        "%level %datetime{%H:%m:%s} (%func): %msg");
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
@@ -118,17 +118,24 @@ int main(int argc, char* argv[])
         if (publisherPort)
             config.setPublisherPort(publisherPort);
 
-        zmqproxy::MatchmakerRedis matchmakerRedis(config);
-        zmqproxy::CentralProxy proxy(config, matchmakerRedis);
+        zmqproxy::CentralProxy proxy(config);
 
         while (true)
         {
             proxy.pollForMessages();
         }
     }
+    catch(const zmqproxy::SystemExit& e)
+    {
+        LOG(ERROR) << "Catched expected!" << e.what();
+    }
     catch(const std::exception& e)
     {
         LOG(ERROR) << e.what();
+    }
+    catch(...)
+    {
+        LOG(ERROR) << "Unexpected exception.";
     }
 
 	return 0;

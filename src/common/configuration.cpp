@@ -27,7 +27,7 @@ using namespace zmqproxy;
 
 Configuration::Configuration(const std::string& configFile)
     : m_usePubSub(true),
-      m_targetExpire(-2),
+      m_targetExpire(180),
       m_targetUpdate(120),
       m_host(boost::asio::ip::host_name()),
       m_redisHost("127.0.0.1"),

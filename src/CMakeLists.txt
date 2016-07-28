@@ -33,6 +33,7 @@ set(HEADER_FILES "common/matchmaker.h"
                  "common/names.h")
 
 set(SOURCE_FILES "common/configuration.cpp"
+                 "common/matchmaker.cpp"
                  "common/matchmaker_redis.cpp"
                  "common/utils.cpp"
                  "proxy/centralproxy.cpp"

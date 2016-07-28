@@ -34,6 +34,8 @@ namespace zmqproxy
     public:
         virtual ~Matchmaker() {}
 
+        static std::shared_ptr<Matchmaker> create(const Configuration& config);
+
         virtual void registerPublisher(const PublisherAddressT& host) = 0;
         virtual void unregisterPublisher(const PublisherAddressT& host) = 0;
 

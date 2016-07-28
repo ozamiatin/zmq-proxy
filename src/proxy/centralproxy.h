@@ -20,6 +20,8 @@
 
 
 #include "zmq.hpp"
+#include <thread>
+#include <atomic>
 
 
 namespace zmqproxy
@@ -30,11 +32,14 @@ namespace zmqproxy
     class CentralProxy
     {
         const Configuration& m_conf;
-        Matchmaker& m_matchmaker;
+        std::shared_ptr<Matchmaker> m_matchmaker;
         zmq::context_t m_context;
         zmq::socket_t m_feRouter;
         zmq::socket_t m_beRouter;
         zmq::socket_t m_publisher;
+
+        std::atomic<bool> m_stopUpdates;
+        std::unique_ptr<std::thread> m_matchmakerUpdater;
 
         std::string m_feRouterAddress;
         std::string m_beRouterAddress;
@@ -42,11 +47,12 @@ namespace zmqproxy
 
 
     public:
-        CentralProxy(const Configuration& conf, Matchmaker& matchmaker);
+        CentralProxy(const Configuration& conf);
         ~CentralProxy();
         void pollForMessages();
 
     private:
+        void updateMatchmaker();
         void redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
         void dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
     };
