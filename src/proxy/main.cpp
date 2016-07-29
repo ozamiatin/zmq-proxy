@@ -73,7 +73,7 @@ int main(int argc, char* argv[])
     START_EASYLOGGINGPP(argc, argv);
     init_signal_handling();
     el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
-                                       "%level %datetime{%H:%m:%s} (%func): %msg");
+                                       "%datetime{%H:%m:%s} %func %level    %msg");
     el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 
     namespace po = boost::program_options;

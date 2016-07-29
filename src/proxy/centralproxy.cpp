@@ -42,14 +42,13 @@ CentralProxy::CentralProxy(const Configuration& conf)
       m_beRouterAddress(conf.host() + ":" + std::to_string(conf.getBackendPort())),
       m_publisherAddress(conf.host() + ":" + std::to_string(conf.getPublisherPort()))
 {
-    el::Loggers::getLogger("CentralProxy");
-    CLOG(INFO, "CentralProxy") << "Starting central router ";
+    LOG(INFO) << "Starting central router ";
 
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
+    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
     m_feRouter.bind("tcp://*:" + std::to_string(conf.getFrontendPort()));
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
+    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
     m_beRouter.bind("tcp://*:" + std::to_string(conf.getBackendPort()));
-    CLOG(INFO, "CentralProxy") << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
+    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
     m_publisher.bind("tcp://*:" + std::to_string(conf.getPublisherPort()));
 
     m_stopUpdates.store(false);
@@ -64,11 +63,11 @@ void CentralProxy::updateMatchmaker()
         m_matchmaker->registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
         m_matchmaker->registerRouter(m_beRouterAddress);
 
-        CLOG(INFO, "CentralProxy") << "[PUB:" << std::to_string(m_conf.getPublisherPort())
+        LOG(INFO) << "[PUB:" << std::to_string(m_conf.getPublisherPort())
                                    << ", ROUTER:"
                                    << std::to_string(m_conf.getFrontendPort()) << "] Update PUB publisher";
 
-        CLOG(INFO, "CentralProxy") << "[Backend ROUTER:"
+        LOG(INFO) << "[Backend ROUTER:"
                                    << std::to_string(m_conf.getPublisherPort())
                                    << "] Update ROUTER";
 
@@ -81,7 +80,7 @@ CentralProxy::~CentralProxy()
 {
     m_stopUpdates.store(true);
 
-    CLOG(INFO, "CentralProxy") << "Destroy central router ";
+    LOG(INFO) << "Destroy central router ";
     m_matchmaker->unregisterPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
     m_matchmaker->unregisterRouter(m_beRouterAddress);
 }
@@ -97,17 +96,11 @@ void CentralProxy::pollForMessages()
     //  Process messages from both sockets
     while (1) {
         zmq::poll (&items [0], 2, -1);
-        CLOG(DEBUG, "CentralProxy") << "Message pending";
-
         if (items [0].revents & ZMQ_POLLIN) {
-            CLOG(DEBUG, "CentralProxy") << "FE message";
             redirectInRequest(m_feRouter, m_beRouter);
-            CLOG(DEBUG, "CentralProxy") << "FE message redirected";
         }
         if (items [1].revents & ZMQ_POLLIN) {
-            CLOG(DEBUG, "CentralProxy") << "BE message";
             redirectInRequest(m_beRouter, m_feRouter);
-            CLOG(DEBUG, "CentralProxy") << "BE message redirected";
         }
     }
 }
@@ -124,19 +117,22 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     zmq::message_t msgType;
     socketFe.recv(&msgType);
     auto messageType = getMessageType(msgType);
-    CLOG(DEBUG, "CentralProxy") << "Message type: " << toString(messageType);
 
     zmq::message_t routingKey;
     socketFe.recv(&routingKey);
-//  CLOG(DEBUG, "CentralProxy") << "Routing key: " << getString(routingKey);
 
     zmq::message_t messageId;
     socketFe.recv(&messageId);
-//  CLOG(DEBUG, "CentralProxy") << "Dispatching message: " << getString(messageId);
 
     if (isDirect(messageType))
     {
-        CLOG(DEBUG, "CentralProxy") << "Direct type handling";
+        LOG(DEBUG) << "Dispatching "
+                                    << toString(messageType)
+                                    << " message "
+                                    << getString(messageId)
+                                    << " - to "
+                                    << getString(routingKey);
+
         socketBe.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
 
         sendString(socketBe, EMPTY, ZMQ_SNDMORE | ZMQ_NOBLOCK);
@@ -147,7 +143,10 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     }
     else if (isMultisend(messageType))
     {
-        CLOG(DEBUG, "CentralProxy") << "Multisend type handling";
+        LOG(DEBUG) << "Publishing message "
+                                    << getString(messageId)
+                                    << " on [" << getString(routingKey) << "]";
+
         m_publisher.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
         m_publisher.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
         dispatchMessageTail(socketFe, m_publisher);
@@ -158,14 +157,11 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
 void CentralProxy::dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
 {
     bool more = true;
-    int i = 0;
     zmq::message_t msg;
     while (more)
     {
         socketFe.recv(&msg);
         more = msg.more();
-        CLOG(DEBUG, "CentralProxy") << "Message part " << i++;
         socketBe.send(msg, more ? ZMQ_SNDMORE | ZMQ_NOBLOCK : ZMQ_NOBLOCK);
     }
-    CLOG(DEBUG, "CentralProxy") << "Message sent ...";
 }

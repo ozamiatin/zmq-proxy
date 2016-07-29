@@ -27,17 +27,17 @@ std::string toString(MessageType msgType)
     switch(msgType)
     {
         case MessageType::Call:
-            return "Call";
+            return "CALL";
         case MessageType::Cast:
-            return "Cast";
+            return "CAST";
         case MessageType::Fanout:
-            return "Fanout";
+            return "FANOUT";
         case MessageType::Notify:
-            return "Notify";
+            return "NOTIFY";
         case MessageType::Reply:
-            return "Reply";
+            return "REPLY";
         case MessageType::Ack:
-            return "Ack";
+            return "ACK";
         default:
             break;
     }
@@ -75,7 +75,8 @@ bool isDirect(MessageType msgType)
 {
     return msgType == MessageType::Call
             || msgType == MessageType::Cast
-            || msgType == MessageType::Reply;
+            || msgType == MessageType::Reply
+            || msgType == MessageType::Ack;
 }
 
 
