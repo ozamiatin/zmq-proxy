@@ -1,4 +1,12 @@
-# echo "Installing cmake"
+echo "Installing cmake 3.2.2"
+
+sudo apt-get install -qq --force-yes build-essential
+wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz
+tar xf cmake-3.2.2.tar.gz
+cd cmake-3.2.2
+./configure
+make -j && sudo make install && sudo ldconfig
+
 # sudo apt-get install -qq --force-yes cmake
 
 #echo "Installing BOOST libraries"

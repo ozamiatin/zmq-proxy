@@ -10,7 +10,7 @@
 #   - ZEROMQ_INCLUDE_DIR to the directory where zmq.h is located
 #
 
-cmake_minimum_required(VERSION 2.8.1)
+cmake_minimum_required(VERSION 3.2.1)
 enable_testing()
 
 add_compile_options(-std=c++11)
