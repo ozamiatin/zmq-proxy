@@ -31,7 +31,6 @@ ExternalProject_Add(zeromq
     GIT_REPOSITORY "https://github.com/zeromq/libzmq"
     DOWNLOAD_DIR "3rd-party"
     BUILD_COMMAND make
-    INSTALL_DIR "/usr/local/lib"
     CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release")
 
 
