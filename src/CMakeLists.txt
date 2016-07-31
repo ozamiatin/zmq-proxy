@@ -52,7 +52,4 @@ set(SOURCE_FILES "common/configuration.cpp"
                  "proxy/main.cpp")
 
 add_executable(zmq-proxy ${HEADER_FILES} ${SOURCE_FILES})
-
-add_dependencies(zmq_proxy zeromq)
-
-target_link_libraries(zmq-proxy zmq ${Boost_LIBRARIES} boost_program_options boost_system cpp_redis)
+target_link_libraries(zmq-proxy zeromq ${Boost_LIBRARIES} boost_program_options boost_system cpp_redis)
