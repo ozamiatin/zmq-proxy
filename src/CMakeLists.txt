@@ -26,6 +26,7 @@ project(zmq_proxy)
 set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
+include(ExternalProject)
 ExternalProject_Add(zeromq
     GIT_REPOSITORY "https://github.com/zeromq/libzmq"
     DOWNLOAD_DIR "3rd-party"
