@@ -30,7 +30,7 @@ include(ExternalProject)
 ExternalProject_Add(zeromq
     GIT_REPOSITORY "https://github.com/zeromq/libzmq"
     DOWNLOAD_DIR "3rd-party"
-    BUILD_COMMAND "make -j9"
+    BUILD_COMMAND make
     INSTALL_DIR "/usr/local/lib"
     INSTALL_COMMAND "make install && sudo ldconfig"
     CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release")
