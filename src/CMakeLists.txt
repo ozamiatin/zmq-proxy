@@ -32,7 +32,7 @@ ExternalProject_Add(zeromq
     DOWNLOAD_DIR "3rd-party"
     BUILD_COMMAND make
     INSTALL_DIR "/usr/local/lib"
-    INSTALL_COMMAND "make install && sudo ldconfig"
+    INSTALL_COMMAND "make install"
     CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release")
 
 
