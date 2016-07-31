@@ -25,6 +25,15 @@ project(zmq_proxy)
 
 find_package(Boost COMPONENTS program_options REQUIRED)
 
+ExternalProject_Add(zeromq
+    GIT_REPOSITORY "https://github.com/zeromq/libzmq"
+    DOWNLOAD_DIR "3rd-party"
+    BUILD_COMMAND "make -j"
+    INSTALL_DIR "/usr/local/lib"
+    INSTALL_COMMAND "make install && sudo ldconfig"
+    CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release")
+
+
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
