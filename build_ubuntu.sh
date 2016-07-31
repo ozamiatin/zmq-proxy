@@ -1,6 +1,6 @@
 echo "Installing cmake"
 
-# sudo apt-get install -qq --force-yes build-essential
+ sudo apt-get install -qq --force-yes build-essential
 # wget http://www.cmake.org/files/v3.5/cmake-3.5.2.tar.gz
 # tar xf cmake-3.5.2.tar.gz
 # cd cmake-3.5.2
@@ -13,8 +13,8 @@ echo "Installing cmake"
 
 sudo apt-get install -qq --force-yes cmake
 
-#echo "Installing BOOST libraries"
-#sudo apt-get install -qq --force-yes libboost-dev libboost-program-options-dev
+echo "Installing BOOST libraries"
+sudo apt-get install -qq --force-yes libboost-dev libboost-program-options-dev
 
 #echo "Installing ZeroMQ"
 #sudo apt-get install -qq --force-yes libzmq5-dev
