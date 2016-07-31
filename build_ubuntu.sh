@@ -7,6 +7,9 @@ cd cmake-3.2.2
 ./configure
 make -j && sudo make install && sudo ldconfig
 
+sudo apt-get install -qq --force-yes checkinstall
+sudo checkinstall
+
 # sudo apt-get install -qq --force-yes cmake
 
 #echo "Installing BOOST libraries"
