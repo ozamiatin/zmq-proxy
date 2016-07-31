@@ -5,10 +5,11 @@ wget http://www.cmake.org/files/v3.2/cmake-3.2.2.tar.gz
 tar xf cmake-3.2.2.tar.gz
 cd cmake-3.2.2
 ./configure
-make -j && sudo make install && sudo ldconfig
+make -j
 
 sudo apt-get install -qq --force-yes checkinstall
 sudo checkinstall
+cd ..
 
 # sudo apt-get install -qq --force-yes cmake
 

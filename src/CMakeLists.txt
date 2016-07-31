@@ -23,6 +23,7 @@ set(INCLUDE_DIR "~/3rd-party/cppzmq"
 
 project(zmq_proxy)
 
+set(Boost_USE_STATIC_LIBS   ON)
 find_package(Boost COMPONENTS program_options REQUIRED)
 
 ExternalProject_Add(zeromq
