@@ -1,8 +1,9 @@
 #echo "Installing BOOST libraries"
-#sudo apt-get install libboost-dev
+#sudo apt-get install -qq --force-yes libboost-dev
+sudo apt-get install -qq --force-yes libboost-program-options-dev
 
-echo "Installing cmake"
-sudo apt-get install cmake
+# echo "Installing cmake"
+# sudo apt-get install -qq --force-yes cmake
 
 mkdir build-Debug
 cd build-Debug
