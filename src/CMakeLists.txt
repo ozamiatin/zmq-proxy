@@ -28,10 +28,12 @@ find_package(Boost COMPONENTS program_options REQUIRED)
 
 include(ExternalProject)
 ExternalProject_Add(zeromq
+	PREFIX 3rd-party
+	INSTALL_DIR ${CMAKE_BINARY_DIR}/install
     GIT_REPOSITORY "https://github.com/zeromq/libzmq"
-    DOWNLOAD_DIR "3rd-party"
     BUILD_COMMAND make
-    CMAKE_ARGS "-DCMAKE_BUILD_TYPE=Release")
+    CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install
+    LOG_CONFIGURE 1)
 
 
 include_directories(${Boost_INCLUDE_DIRS})
