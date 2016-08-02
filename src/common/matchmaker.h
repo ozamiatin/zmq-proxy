@@ -21,6 +21,7 @@
 #include <utility>
 #include <string>
 #include <list>
+#include <memory>
 
 
 namespace zmqproxy
