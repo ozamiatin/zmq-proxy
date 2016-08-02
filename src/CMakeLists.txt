@@ -9,7 +9,7 @@ cmake_minimum_required(VERSION 2.8.1)
 enable_testing()
 
 add_compile_options(-std=c++11)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -W -Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -W -Wall -Wextra -O3 -pthread")
 project(zmq_proxy)
 
 
@@ -83,4 +83,4 @@ add_dependencies(zmq-proxy zeromq
 						   easyloggingpp
 						   cppzmq)
 
-target_link_libraries(zmq-proxy zmq ${Boost_LIBRARIES} boost_program_options boost_system cpp_redis)
+target_link_libraries(zmq-proxy pthread zmq-static ${Boost_LIBRARIES} boost_program_options boost_system cpp_redis)
