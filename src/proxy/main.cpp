@@ -15,7 +15,7 @@
  */
 
 
-#include <csetjmp>
+#include <atomic>
 #include <csignal>
 #include <iostream>
 #include <thread>
@@ -44,31 +44,26 @@ namespace zmqproxy
 }
 
 
-std::jmp_buf gJumpBuffer;
+std::atomic<bool> quit(false);
 
 
 void signal_handler(int sig)
 {
-    std::longjmp(gJumpBuffer, sig);
+    quit = true;
 }
 
 
 void init_signal_handling()
 {
-    std::signal(SIGINT, signal_handler);
-    std::signal(SIGKILL, signal_handler);
-    std::signal(SIGABRT, signal_handler);
-    std::signal(SIGTERM, signal_handler);
-
-    int sig = 0;
-    if ((sig = setjmp(gJumpBuffer)) != 0)
-    {
-        throw zmqproxy::SystemExit();
-    }
+    struct sigaction sa;
+    memset( &sa, 0, sizeof(sa) );
+    sa.sa_handler = signal_handler;
+    sigfillset(&sa.sa_mask);
+    sigaction(SIGINT,&sa,NULL);
 }
 
 
-int main(int argc, char* argv[])
+    int main(int argc, char* argv[])
 {
     START_EASYLOGGINGPP(argc, argv);
     init_signal_handling();
@@ -123,11 +118,18 @@ int main(int argc, char* argv[])
         while (true)
         {
             proxy.pollForMessages();
+            if( quit )
+                // exit normally after SIGINT
+                throw zmqproxy::SystemExit();
         }
     }
     catch(const zmqproxy::SystemExit& e)
     {
         LOG(ERROR) << "Catched expected!" << e.what();
+    }
+    catch(const std::runtime_error& e)
+    {
+        LOG(ERROR) << e.what();
     }
     catch(const std::exception& e)
     {
