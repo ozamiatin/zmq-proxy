@@ -63,7 +63,7 @@ void init_signal_handling()
 }
 
 
-    int main(int argc, char* argv[])
+int main(int argc, char* argv[])
 {
     START_EASYLOGGINGPP(argc, argv);
     init_signal_handling();
