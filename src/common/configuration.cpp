@@ -46,28 +46,22 @@ Configuration::Configuration(const std::string& configFile)
             boost::property_tree::ptree conf;
             boost::property_tree::ini_parser::read_ini(configFile, conf);
 
-            m_usePubSub = conf.get<bool>("DEFAULT.use_pub_sub");
-            m_targetExpire = conf.get<int>("DEFAULT.zmq_target_expire");
-            m_targetUpdate = conf.get<int>("DEFAULT.zmq_target_update");
-            m_host = conf.get<std::string>("DEFAULT.rpc_zmq_host");
+            m_usePubSub = conf.get<bool>("DEFAULT.use_pub_sub", m_usePubSub);
+            m_targetExpire = conf.get<int>("DEFAULT.zmq_target_expire", m_targetExpire);
+            m_targetUpdate = conf.get<int>("DEFAULT.zmq_target_update", m_targetUpdate);
+            m_host = conf.get<std::string>("DEFAULT.rpc_zmq_host", m_host);
 
-            m_redisHost = conf.get<std::string>("matchmaker_redis.host");
-            m_redisPort = conf.get<int>("matchmaker_redis.port");
-            m_redisPassword = conf.get<std::string>("matchmaker_redis.password");
-
-        //    m_sentinelHosts;
-        //    m_sentinelGroupName;
-        //    m_sentinelWaitTimeout;
-        //    m_sentinelCheckTimeout;
-        //    m_sentinelSocketTimeout;
-
+            m_redisHost = conf.get<std::string>("matchmaker_redis.host", m_redisHost);
+            m_redisPort = conf.get<int>("matchmaker_redis.port", m_redisPort);
+            m_redisPassword = conf.get<std::string>("matchmaker_redis.password", m_redisPassword);
 
             LOG(INFO) << "Read configuration from '" << configFile << "'";
         }
         catch(const std::exception& e)
         {
             LOG(WARNING) << "Unrecognized configuration file '"
-                         << configFile << "', used default configuration.";
+                         << configFile << "', used default configuration."
+                         << e.what();
         }
     }
     LOG(INFO) << std::boolalpha << "use_pub_sub=" << m_usePubSub;
