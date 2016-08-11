@@ -1,0 +1,7 @@
+mkdir build-Release
+cd build-Release
+
+cmake ../src -DCMAKE_BUILD_TYPE=Release
+make -j
+
+cd ..
