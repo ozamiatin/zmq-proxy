@@ -2,9 +2,13 @@ This is C++ implementation of oslo.messaging zmq proxy.
 
 To build on ubuntu just execute:
 
-. install_deps_ubuntu # install cmake and boost libraries
-. build # build Debug
+```bash
+. install_deps_ubuntu
+. build
+```
 
 For release build type
 
+```bash
 . build_release
+```
