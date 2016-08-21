@@ -133,12 +133,12 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
                                     << " - to "
                                     << getString(routingKey);
 
-        socketBe.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        socketBe.send(routingKey, ZMQ_SNDMORE);
 
-        sendString(socketBe, EMPTY, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-        socketBe.send(replyId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-        socketBe.send(msgType, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-        socketBe.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        sendString(socketBe, EMPTY, ZMQ_SNDMORE);
+        socketBe.send(replyId, ZMQ_SNDMORE);
+        socketBe.send(msgType, ZMQ_SNDMORE);
+        socketBe.send(messageId, ZMQ_SNDMORE);
         dispatchMessageTail(socketFe, socketBe);
     }
     else if (isMultisend(messageType))
@@ -147,8 +147,8 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
                                     << getString(messageId)
                                     << " on [" << getString(routingKey) << "]";
 
-        m_publisher.send(routingKey, ZMQ_SNDMORE | ZMQ_NOBLOCK);
-        m_publisher.send(messageId, ZMQ_SNDMORE | ZMQ_NOBLOCK);
+        m_publisher.send(routingKey, ZMQ_SNDMORE);
+        m_publisher.send(messageId, ZMQ_SNDMORE);
         dispatchMessageTail(socketFe, m_publisher);
     }
 }
@@ -162,6 +162,6 @@ void CentralProxy::dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& s
     {
         socketFe.recv(&msg);
         more = msg.more();
-        socketBe.send(msg, more ? ZMQ_SNDMORE | ZMQ_NOBLOCK : ZMQ_NOBLOCK);
+        socketBe.send(msg, more ? ZMQ_SNDMORE : 0);
     }
 }
