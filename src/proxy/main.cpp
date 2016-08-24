@@ -19,15 +19,11 @@
 #include <csignal>
 #include <iostream>
 #include <thread>
-#include <easylogging++.h>
 #include <boost/program_options.hpp>
 
 #include "centralproxy.h"
 #include "common/configuration.h"
 #include "common/matchmaker_redis.h"
-
-
-INITIALIZE_EASYLOGGINGPP
 
 
 namespace zmqproxy
@@ -65,11 +61,7 @@ void init_signal_handling()
 
 int main(int argc, char* argv[])
 {
-    START_EASYLOGGINGPP(argc, argv);
     init_signal_handling();
-    el::Loggers::reconfigureAllLoggers(el::ConfigurationType::Format,
-                                       "%datetime{%H:%m:%s} %func %level    %msg");
-    el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
 
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
@@ -125,19 +117,19 @@ int main(int argc, char* argv[])
     }
     catch(const zmqproxy::SystemExit& e)
     {
-        LOG(ERROR) << "Catched expected!" << e.what();
+        LOG(error) << "Catched expected!" << e.what();
     }
     catch(const std::runtime_error& e)
     {
-        LOG(ERROR) << e.what();
+        LOG(error) << e.what();
     }
     catch(const std::exception& e)
     {
-        LOG(ERROR) << e.what();
+        LOG(error) << e.what();
     }
     catch(...)
     {
-        LOG(ERROR) << "Unexpected exception.";
+        LOG(error) << "Unexpected exception.";
     }
 
 	return 0;

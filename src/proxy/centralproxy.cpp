@@ -17,7 +17,6 @@
 
 #include "centralproxy.h"
 
-#include <easylogging++.h>
 #include <zmq_addon.hpp>
 
 #include "common/configuration.h"
@@ -42,13 +41,13 @@ CentralProxy::CentralProxy(const Configuration& conf)
       m_beRouterAddress(conf.host() + ":" + std::to_string(conf.getBackendPort())),
       m_publisherAddress(conf.host() + ":" + std::to_string(conf.getPublisherPort()))
 {
-    LOG(INFO) << "Starting central router ";
+    LOG(info) << "Starting central router ";
 
-    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
     m_feRouter.bind("tcp://*:" + std::to_string(conf.getFrontendPort()));
-    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
     m_beRouter.bind("tcp://*:" + std::to_string(conf.getBackendPort()));
-    LOG(INFO) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
     m_publisher.bind("tcp://*:" + std::to_string(conf.getPublisherPort()));
 
     m_stopUpdates.store(false);
@@ -63,13 +62,13 @@ void CentralProxy::updateMatchmaker()
         m_matchmaker->registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
         m_matchmaker->registerRouter(m_beRouterAddress);
 
-        LOG(INFO) << "[PUB:" << std::to_string(m_conf.getPublisherPort())
-                                   << ", ROUTER:"
-                                   << std::to_string(m_conf.getFrontendPort()) << "] Update PUB publisher";
+        LOG(info) << "[PUB:" << std::to_string(m_conf.getPublisherPort())
+                  << ", ROUTER:"
+                  << std::to_string(m_conf.getFrontendPort()) << "] Update PUB publisher";
 
-        LOG(INFO) << "[Backend ROUTER:"
-                                   << std::to_string(m_conf.getPublisherPort())
-                                   << "] Update ROUTER";
+        LOG(info) << "[Backend ROUTER:"
+                  << std::to_string(m_conf.getPublisherPort())
+                  << "] Update ROUTER";
 
         std::this_thread::sleep_for(std::chrono::seconds(m_conf.targetUpdate()));
     }
@@ -80,7 +79,7 @@ CentralProxy::~CentralProxy()
 {
     m_stopUpdates.store(true);
 
-    LOG(INFO) << "Destroy central router ";
+    LOG(info) << "Destroy central router ";
     m_matchmaker->unregisterPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
     m_matchmaker->unregisterRouter(m_beRouterAddress);
 }
@@ -126,15 +125,16 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
 
     if (isDirect(messageType))
     {
-        LOG(DEBUG) << "Dispatching "
-                                    << toString(messageType)
-                                    << " message "
-                                    << getString(messageId)
-                                    << " - to "
-                                    << getString(routingKey);
+        LOG(debug) << "Dispatching "
+                   << toString(messageType)
+                   << " message "
+                   << getString(messageId)
+                   << " - from "
+                   << getString(replyId)
+                   << " to -> "
+                   << getString(routingKey);
 
         socketBe.send(routingKey, ZMQ_SNDMORE);
-
         sendString(socketBe, EMPTY, ZMQ_SNDMORE);
         socketBe.send(replyId, ZMQ_SNDMORE);
         socketBe.send(msgType, ZMQ_SNDMORE);
@@ -143,9 +143,9 @@ void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& soc
     }
     else if (isMultisend(messageType))
     {
-        LOG(DEBUG) << "Publishing message "
-                                    << getString(messageId)
-                                    << " on [" << getString(routingKey) << "]";
+        LOG(debug) << "Publishing message "
+                   << getString(messageId)
+                   << " on [" << getString(routingKey) << "]";
 
         m_publisher.send(routingKey, ZMQ_SNDMORE);
         m_publisher.send(messageId, ZMQ_SNDMORE);
