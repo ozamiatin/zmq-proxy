@@ -21,54 +21,58 @@
 #include <string>
 #include <list>
 
+#include <boost/log/trivial.hpp>
+
+#define LOG BOOST_LOG_TRIVIAL
+
 
 namespace zmqproxy
 {
     class Configuration
     {
-        bool m_usePubSub;
-        int m_targetExpire;
-        int m_targetUpdate;
-        std::string m_host;
+        bool _use_pub_sub;
+        int _target_expire;
+        int _target_update;
+        std::string _host;
 
-        std::string m_redisHost;
-        int m_redisPort;
-        std::string m_redisPassword;
+        std::string _redis_host;
+        int _redis_port;
+        std::string _redis_password;
 
-        std::list<std::string> m_sentinelHosts;
-        std::string m_sentinelGroupName;
-        int m_sentinelWaitTimeout;
-        int m_sentinelCheckTimeout;
-        int m_sentinelSocketTimeout;
+        std::list<std::string> _sentinel_hosts;
+        std::string _sentinel_group_name;
+        int _sentinel_wait_timeout;
+        int _sentinel_check_timeout;
+        int _sentinel_socket_timeout;
 
-        unsigned int m_frontendPort;
-        unsigned int m_backendPort;
-        unsigned int m_publisherPort;
+        unsigned int _frontend_port;
+        unsigned int _backend_port;
+        unsigned int _publisher_port;
 
     public:
-        Configuration(const std::string& configFile);
-        bool usePubSub() const;
-        int targetExpire() const;
-        int targetUpdate() const;
+        Configuration(const std::string& config_file);
+        bool use_pub_sub() const;
+        int target_expire() const;
+        int target_update() const;
         std::string host() const;
 
-        std::string redisHost() const;
-        unsigned int redisPort() const;
-        std::string redisPassword() const;
+        std::string redis_host() const;
+        unsigned int redis_port() const;
+        std::string redis_password() const;
 
-        std::list<std::string> sentinelHosts() const;
-        std::string sentinelGroupName() const;
-        int sentinelWaitTimeout() const;
-        int sentinelCheckTimeout() const;
-        int sentinelSocketTimeout() const;
+        std::list<std::string> sentinel_hosts() const;
+        std::string sentinel_group_name() const;
+        int sentinel_wait_timeout() const;
+        int sentinel_check_timeout() const;
+        int sentinel_socket_timeout() const;
 
-        void setFrontendPort(unsigned int port);
-        void setBackendPort(unsigned int port);
-        void setPublisherPort(unsigned int port);
+        void set_frontend_port(unsigned int port);
+        void set_backend_port(unsigned int port);
+        void set_publisher_port(unsigned int port);
 
-        unsigned int getFrontendPort() const;
-        unsigned int getBackendPort() const;
-        unsigned int getPublisherPort() const;
+        unsigned int get_frontend_port() const;
+        unsigned int get_backend_port() const;
+        unsigned int get_publisher_port() const;
     };
 }
 

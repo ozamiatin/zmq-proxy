@@ -16,7 +16,6 @@
 
 #include "configuration.h"
 
-#include <easylogging++.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/ini_parser.hpp>
 #include <boost/asio/ip/host_name.hpp>
@@ -25,155 +24,155 @@
 using namespace zmqproxy;
 
 
-Configuration::Configuration(const std::string& configFile)
-    : m_usePubSub(true),
-      m_targetExpire(180),
-      m_targetUpdate(120),
-      m_host(boost::asio::ip::host_name()),
-      m_redisHost("127.0.0.1"),
-      m_redisPort(6379),
-      m_sentinelWaitTimeout(5000),
-      m_sentinelCheckTimeout(60000),
-      m_sentinelSocketTimeout(10000),
-      m_frontendPort(0),
-      m_backendPort(0),
-      m_publisherPort(0)
+Configuration::Configuration(const std::string& config_file)
+    : _use_pub_sub(true),
+      _target_expire(180),
+      _target_update(120),
+      _host(boost::asio::ip::host_name()),
+      _redis_host("127.0.0.1"),
+      _redis_port(6379),
+      _sentinel_wait_timeout(5000),
+      _sentinel_check_timeout(60000),
+      _sentinel_socket_timeout(10000),
+      _frontend_port(0),
+      _backend_port(0),
+      _publisher_port(0)
 {
-    if (!configFile.empty())
+    if (!config_file.empty())
     {
         try
         {
             boost::property_tree::ptree conf;
-            boost::property_tree::ini_parser::read_ini(configFile, conf);
+            boost::property_tree::ini_parser::read_ini(config_file, conf);
 
-            m_usePubSub = conf.get<bool>("DEFAULT.use_pub_sub", m_usePubSub);
-            m_targetExpire = conf.get<int>("DEFAULT.zmq_target_expire", m_targetExpire);
-            m_targetUpdate = conf.get<int>("DEFAULT.zmq_target_update", m_targetUpdate);
-            m_host = conf.get<std::string>("DEFAULT.rpc_zmq_host", m_host);
+            _use_pub_sub = conf.get<bool>("DEFAULT.use_pub_sub", _use_pub_sub);
+            _target_expire = conf.get<int>("DEFAULT.zmq_target_expire", _target_expire);
+            _target_update = conf.get<int>("DEFAULT.zmq_target_update", _target_update);
+            _host = conf.get<std::string>("DEFAULT.rpc_zmq_host", _host);
 
-            m_redisHost = conf.get<std::string>("matchmaker_redis.host", m_redisHost);
-            m_redisPort = conf.get<int>("matchmaker_redis.port", m_redisPort);
-            m_redisPassword = conf.get<std::string>("matchmaker_redis.password", m_redisPassword);
+            _redis_host = conf.get<std::string>("matchmaker_redis.host", _redis_host);
+            _redis_port = conf.get<int>("matchmaker_redis.port", _redis_port);
+            _redis_password = conf.get<std::string>("matchmaker_redis.password", _redis_password);
 
-            LOG(INFO) << "Read configuration from '" << configFile << "'";
+            LOG(info) << "Read configuration from '" << config_file << "'";
         }
         catch(const std::exception& e)
         {
-            LOG(WARNING) << "Unrecognized configuration file '"
-                         << configFile << "', used default configuration."
+            LOG(warning) << "Unrecognized configuration file '"
+                         << config_file << "', used default configuration."
                          << e.what();
         }
     }
-    LOG(INFO) << std::boolalpha << "use_pub_sub=" << m_usePubSub;
-    LOG(INFO) << "zmq_target_expire=" << m_targetExpire;
-    LOG(INFO) << "zmq_target_update=" << m_targetUpdate;
-    LOG(INFO) << "rpc_zmq_host=" << m_host;
+    LOG(info) << std::boolalpha << "use_pub_sub=" << _use_pub_sub;
+    LOG(info) << "zmq_target_expire=" << _target_expire;
+    LOG(info) << "zmq_target_update=" << _target_update;
+    LOG(info) << "rpc_zmq_host=" << _host;
 }
 
 
-bool Configuration::usePubSub() const
+bool Configuration::use_pub_sub() const
 {
-    return m_usePubSub;
+    return _use_pub_sub;
 }
 
 
-int Configuration::targetExpire() const
+int Configuration::target_expire() const
 {
-    return m_targetExpire;
+    return _target_expire;
 }
 
 
-int Configuration::targetUpdate() const
+int Configuration::target_update() const
 {
-    return m_targetUpdate;
+    return _target_update;
 }
 
 
 std::string Configuration::host() const
 {
-    return m_host;
+    return _host;
 }
 
 
-std::string Configuration::redisHost() const
+std::string Configuration::redis_host() const
 {
-    return m_redisHost;
+    return _redis_host;
 }
 
 
-unsigned int Configuration::redisPort() const
+unsigned int Configuration::redis_port() const
 {
-    return m_redisPort;
+    return _redis_port;
 }
 
 
-std::string Configuration::redisPassword() const
+std::string Configuration::redis_password() const
 {
-    return m_redisPassword;
+    return _redis_password;
 }
 
 
-std::list<std::string> Configuration::sentinelHosts() const
+std::list<std::string> Configuration::sentinel_hosts() const
 {
-    return m_sentinelHosts;
+    return _sentinel_hosts;
 }
 
 
-std::string Configuration::sentinelGroupName() const
+std::string Configuration::sentinel_group_name() const
 {
-    return m_sentinelGroupName;
+    return _sentinel_group_name;
 }
 
 
-int Configuration::sentinelWaitTimeout() const
+int Configuration::sentinel_wait_timeout() const
 {
-    return m_sentinelWaitTimeout;
+    return _sentinel_wait_timeout;
 }
 
 
-int Configuration::sentinelCheckTimeout() const
+int Configuration::sentinel_check_timeout() const
 {
-    return m_sentinelCheckTimeout;
+    return _sentinel_check_timeout;
 }
 
 
-int Configuration::sentinelSocketTimeout() const
+int Configuration::sentinel_socket_timeout() const
 {
-    return m_sentinelSocketTimeout;
+    return _sentinel_socket_timeout;
 }
 
 
-void Configuration::setFrontendPort(unsigned int port)
+void Configuration::set_frontend_port(unsigned int port)
 {
-    m_frontendPort = port;
+    _frontend_port = port;
 }
 
 
-void Configuration::setBackendPort(unsigned int port)
+void Configuration::set_backend_port(unsigned int port)
 {
-    m_backendPort = port;
+    _backend_port = port;
 }
 
 
-void Configuration::setPublisherPort(unsigned int port)
+void Configuration::set_publisher_port(unsigned int port)
 {
-    m_publisherPort = port;
+    _publisher_port = port;
 }
 
 
-unsigned int Configuration::getFrontendPort() const
+unsigned int Configuration::get_frontend_port() const
 {
-    return m_frontendPort;
+    return _frontend_port;
 }
 
 
-unsigned int Configuration::getBackendPort() const
+unsigned int Configuration::get_backend_port() const
 {
-    return m_backendPort;
+    return _backend_port;
 }
 
 
-unsigned int Configuration::getPublisherPort() const
+unsigned int Configuration::get_publisher_port() const
 {
-    return m_publisherPort;
+    return _publisher_port;
 }

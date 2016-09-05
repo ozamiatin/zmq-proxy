@@ -55,23 +55,17 @@ ExternalProject_Get_Property(cppzmq source_dir)
 set(INCLUDE_DIR_CPPZMQ ${source_dir})
 
 
-ExternalProject_Add(easyloggingpp
-    PREFIX 3rd-party
-    GIT_REPOSITORY "https://github.com/easylogging/easyloggingpp.git"
-    CONFIGURE_COMMAND ""
-    BUILD_COMMAND ""
-    INSTALL_COMMAND ""
-    LOG_DOWNLOAD ON)
-ExternalProject_Get_Property(easyloggingpp source_dir)
-set(INCLUDE_DIR_EASYLOGGINGPP ${source_dir}/src)
-
-
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost COMPONENTS program_options REQUIRED)
+add_definitions(-DBOOST_LOG_DYN_LINK)
 
-include_directories(${Boost_INCLUDE_DIRS})
+if (APPLE)
+    add_definitions(-DBOOST_LOG_NO_THREADS)
+endif()
+
+find_package(Boost COMPONENTS program_options log REQUIRED)
+
+include_directories(${Boost_INCLUDE_DIR})
 include_directories(${INCLUDE_DIR_CPPZMQ})
-include_directories(${INCLUDE_DIR_EASYLOGGINGPP})
 include_directories(${INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 
@@ -89,13 +83,13 @@ set(SOURCE_FILES "common/configuration.cpp"
 add_executable(zmq-proxy ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(zmq-proxy zeromq
-						   cpp-redis
-						   easyloggingpp
-						   cppzmq)
+                           cpp-redis
+                           cppzmq)
 
 target_link_libraries(zmq-proxy pthread
-								zmq-static
-								${Boost_LIBRARIES}
-								boost_program_options
-								boost_system
-								cpp_redis)
+                                zmq-static
+                                ${Boost_LIBRARIES}
+                                boost_program_options
+                                boost_system
+                                boost_log
+                                cpp_redis)

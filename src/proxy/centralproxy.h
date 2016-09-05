@@ -31,30 +31,30 @@ namespace zmqproxy
 
     class CentralProxy
     {
-        const Configuration& m_conf;
-        std::shared_ptr<Matchmaker> m_matchmaker;
-        zmq::context_t m_context;
-        zmq::socket_t m_feRouter;
-        zmq::socket_t m_beRouter;
-        zmq::socket_t m_publisher;
+        const Configuration& _conf;
+        std::shared_ptr<Matchmaker> _matchmaker;
+        zmq::context_t _context;
+        zmq::socket_t _fe_router;
+        zmq::socket_t _be_router;
+        zmq::socket_t _publisher;
 
-        std::atomic<bool> m_stopUpdates;
-        std::unique_ptr<std::thread> m_matchmakerUpdater;
+        std::atomic<bool> _stop_updates;
+        std::unique_ptr<std::thread> _matchmaker_updater;
 
-        std::string m_feRouterAddress;
-        std::string m_beRouterAddress;
-        std::string m_publisherAddress;
+        std::string _fe_router_address;
+        std::string _be_router_address;
+        std::string _publisher_address;
 
 
     public:
         CentralProxy(const Configuration& conf);
         ~CentralProxy();
-        void pollForMessages();
+        void poll_for_messages();
 
     private:
-        void updateMatchmaker();
-        void redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
-        void dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe);
+        void update_matchmaker();
+        void redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& socket_be);
+        void dispatch_message_tail(zmq::socket_t& socket_fe, zmq::socket_t& socket_be);
     };
 }
 

@@ -28,28 +28,28 @@ namespace zmqproxy
 
     class MatchmakerRedis : public Matchmaker
     {
-        const Configuration& m_conf;
-        cpp_redis::redis_client m_redis;
+        const Configuration& _conf;
+        cpp_redis::redis_client _redis;
 
 
     public:
 
         MatchmakerRedis(const Configuration& conf);
 
-        virtual void registerPublisher(const PublisherAddressT& host);
-        virtual void unregisterPublisher(const PublisherAddressT& host);
+        virtual void register_publisher(const PublisherAddressT& host);
+        virtual void unregister_publisher(const PublisherAddressT& host);
 
-        virtual void registerRouter(const std::string& hostname);
-        virtual void unregisterRouter(const std::string& hostname);
+        virtual void register_router(const std::string& hostname);
+        virtual void unregister_router(const std::string& hostname);
 
-        virtual std::list<PublisherAddressT> getPublishers() const;
-        virtual std::list<std::string> getRouters() const;
+        virtual std::list<PublisherAddressT> get_publishers() const;
+        virtual std::list<std::string> get_routers() const;
 
 
     private:
 
-        void addHost(const std::string& key, const std::string& host);
-        void removeHost(const std::string& key, const std::string& host);
+        void add_host(const std::string& key, const std::string& host);
+        void remove_host(const std::string& key, const std::string& host);
     };
 }
 
