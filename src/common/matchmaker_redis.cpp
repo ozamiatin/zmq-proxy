@@ -27,66 +27,66 @@ using namespace zmqproxy;
 
 
 MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
-    : m_conf(conf)
+    : _conf(conf)
 {
     LOG(info) << "Connecting to redis: "
-              << "Host: " << conf.redisHost() << " "
-              << "Port: " << conf.redisPort();
-    m_redis.connect(conf.redisHost(), conf.redisPort());
+              << "Host: " << conf.redis_host() << " "
+              << "Port: " << conf.redis_port();
+    _redis.connect(conf.redis_host(), conf.redis_port());
 }
 
 
-void MatchmakerRedis::registerPublisher(const PublisherAddressT& host)
+void MatchmakerRedis::register_publisher(const PublisherAddressT& host)
 {
-    addHost(PUBLISHERS_KEY, host.first + "," + host.second);
+    add_host(PUBLISHERS_KEY, host.first + "," + host.second);
 }
 
 
-void MatchmakerRedis::unregisterPublisher(const PublisherAddressT& host)
+void MatchmakerRedis::unregister_publisher(const PublisherAddressT& host)
 {
-    removeHost(PUBLISHERS_KEY, host.first + "," + host.second);
+    remove_host(PUBLISHERS_KEY, host.first + "," + host.second);
 }
 
 
-void MatchmakerRedis::registerRouter(const std::string& hostname)
+void MatchmakerRedis::register_router(const std::string& hostname)
 {
-    addHost(ROUTERS_KEY, hostname);
+    add_host(ROUTERS_KEY, hostname);
 }
 
 
-void MatchmakerRedis::unregisterRouter(const std::string& hostname)
+void MatchmakerRedis::unregister_router(const std::string& hostname)
 {
-    removeHost(ROUTERS_KEY, hostname);
+    remove_host(ROUTERS_KEY, hostname);
 }
 
 
-std::list<PublisherAddressT> MatchmakerRedis::getPublishers() const
+std::list<PublisherAddressT> MatchmakerRedis::get_publishers() const
 {
     return std::list<PublisherAddressT>();
 }
 
 
-std::list<std::string> MatchmakerRedis::getRouters() const
+std::list<std::string> MatchmakerRedis::get_routers() const
 {
     return std::list<std::string>();
 }
 
 
-void MatchmakerRedis::addHost(const std::string& key, const std::string& host)
+void MatchmakerRedis::add_host(const std::string& key, const std::string& host)
 {
-    if (!m_redis.is_connected())
+    if (!_redis.is_connected())
         throw std::runtime_error("Redis server is not connected!");
 
     LOG(debug) << "Executing: " << "SADD " << key << " " << host;
-    m_redis.send({"SADD", key, host}, [](const cpp_redis::reply& reply){
+    _redis.send({"SADD", key, host}, [](const cpp_redis::reply& reply){
         if (reply.is_error())
             LOG(error) << "Command execution failed!";
     });
 
-    if (m_conf.targetExpire() >= 0)
+    if (_conf.target_expire() >= 0)
     {
         LOG(debug) << "Executing: " << "EXPIRE " << key;
-        m_redis.send({"EXPIRE", key, std::to_string(m_conf.targetExpire())},
+        _redis.send({"EXPIRE", key, std::to_string(_conf.target_expire())},
                      [](const cpp_redis::reply& reply){
             if (reply.is_error())
                 LOG(error) << "Command execution failed!";
@@ -95,13 +95,13 @@ void MatchmakerRedis::addHost(const std::string& key, const std::string& host)
 }
 
 
-void MatchmakerRedis::removeHost(const std::string& key, const std::string& host)
+void MatchmakerRedis::remove_host(const std::string& key, const std::string& host)
 {
-    if (!m_redis.is_connected())
+    if (!_redis.is_connected())
         throw std::runtime_error("Redis server is not connected!");
 
     LOG(debug) << "Executing: " << "SREM " << key << " " << host;
-    m_redis.send({"SREM", key, host}, [](const cpp_redis::reply& reply){
+    _redis.send({"SREM", key, host}, [](const cpp_redis::reply& reply){
         if (reply.is_error())
             LOG(error) << "Command execution failed!";
     });

@@ -66,9 +66,9 @@ int main(int argc, char* argv[])
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
     std::string configFile;
-    unsigned int frontendPort = 0;
-    unsigned int backendPort = 0;
-    unsigned int publisherPort = 0;
+    unsigned int frontend_port = 0;
+    unsigned int backend_port = 0;
+    unsigned int publisher_port = 0;
 
     desc.add_options()
       ("help,h", "Show help")
@@ -76,13 +76,13 @@ int main(int argc, char* argv[])
       ("config-file,c", po::value<std::string>(&configFile),
                 "ZeroMQ proxy configuration file")
 
-      ("frontend-port,fe", po::value<unsigned int>(&frontendPort),
+      ("frontend-port,fe", po::value<unsigned int>(&frontend_port),
                 "Frontend ROUTER port. RPC clients connect to frontend")
 
-      ("backend-port,be", po::value<unsigned int>(&backendPort),
+      ("backend-port,be", po::value<unsigned int>(&backend_port),
                 "Backend ROUTER port. RPC servers connect to backend.")
 
-      ("publisher-port,pub", po::value<unsigned int>(&publisherPort),
+      ("publisher-port,pub", po::value<unsigned int>(&publisher_port),
                 "Publisher port. Fanout messages go over this port if pub/sub is used.");
 
     po::variables_map vm;
@@ -96,20 +96,20 @@ int main(int argc, char* argv[])
 
         zmqproxy::Configuration config(configFile);
 
-        if (frontendPort)
-            config.setFrontendPort(frontendPort);
+        if (frontend_port)
+            config.set_frontend_port(frontend_port);
 
-        if (backendPort)
-            config.setBackendPort(backendPort);
+        if (backend_port)
+            config.set_backend_port(backend_port);
 
-        if (publisherPort)
-            config.setPublisherPort(publisherPort);
+        if (publisher_port)
+            config.set_publisher_port(publisher_port);
 
         zmqproxy::CentralProxy proxy(config);
 
         while (true)
         {
-            proxy.pollForMessages();
+            proxy.poll_for_messages();
             if( quit )
                 // exit normally after SIGINT
                 throw zmqproxy::SystemExit();

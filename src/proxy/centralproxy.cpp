@@ -31,137 +31,137 @@ const std::string EMPTY = "";
 
 
 CentralProxy::CentralProxy(const Configuration& conf)
-    : m_conf(conf),
-      m_matchmaker(Matchmaker::create(conf)),
-      m_context(zmq::context_t(3)),
-      m_feRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
-      m_beRouter(zmq::socket_t(m_context, zmq::socket_type::router)),
-      m_publisher(zmq::socket_t(m_context, zmq::socket_type::pub)),
-      m_feRouterAddress(conf.host() + ":" + std::to_string(conf.getFrontendPort())),
-      m_beRouterAddress(conf.host() + ":" + std::to_string(conf.getBackendPort())),
-      m_publisherAddress(conf.host() + ":" + std::to_string(conf.getPublisherPort()))
+    : _conf(conf),
+      _matchmaker(Matchmaker::create(conf)),
+      _context(zmq::context_t(3)),
+      _fe_router(zmq::socket_t(_context, zmq::socket_type::router)),
+      _be_router(zmq::socket_t(_context, zmq::socket_type::router)),
+      _publisher(zmq::socket_t(_context, zmq::socket_type::pub)),
+      _fe_router_address(conf.host() + ":" + std::to_string(conf.get_frontend_port())),
+      _be_router_address(conf.host() + ":" + std::to_string(conf.get_backend_port())),
+      _publisher_address(conf.host() + ":" + std::to_string(conf.get_publisher_port()))
 {
     LOG(info) << "Starting central router ";
 
-    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getFrontendPort());
-    m_feRouter.bind("tcp://*:" + std::to_string(conf.getFrontendPort()));
-    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getBackendPort());
-    m_beRouter.bind("tcp://*:" + std::to_string(conf.getBackendPort()));
-    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.getPublisherPort());
-    m_publisher.bind("tcp://*:" + std::to_string(conf.getPublisherPort()));
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.get_frontend_port());
+    _fe_router.bind("tcp://*:" + std::to_string(conf.get_frontend_port()));
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.get_backend_port());
+    _be_router.bind("tcp://*:" + std::to_string(conf.get_backend_port()));
+    LOG(info) << "Bind to address: " << "tcp://*:" + std::to_string(conf.get_publisher_port());
+    _publisher.bind("tcp://*:" + std::to_string(conf.get_publisher_port()));
 
-    m_stopUpdates.store(false);
-    m_matchmakerUpdater.reset(new std::thread(&CentralProxy::updateMatchmaker, this));
+    _stop_updates.store(false);
+    _matchmaker_updater.reset(new std::thread(&CentralProxy::update_matchmaker, this));
 }
 
 
-void CentralProxy::updateMatchmaker()
+void CentralProxy::update_matchmaker()
 {
-    while (!m_stopUpdates)
+    while (!_stop_updates)
     {
-        m_matchmaker->registerPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
-        m_matchmaker->registerRouter(m_beRouterAddress);
+        _matchmaker->register_publisher(std::make_pair(_publisher_address, _fe_router_address));
+        _matchmaker->register_router(_be_router_address);
 
-        LOG(info) << "[PUB:" << std::to_string(m_conf.getPublisherPort())
+        LOG(info) << "[PUB:" << std::to_string(_conf.get_publisher_port())
                   << ", ROUTER:"
-                  << std::to_string(m_conf.getFrontendPort()) << "] Update PUB publisher";
+                  << std::to_string(_conf.get_frontend_port()) << "] Update PUB publisher";
 
         LOG(info) << "[Backend ROUTER:"
-                  << std::to_string(m_conf.getPublisherPort())
+                  << std::to_string(_conf.get_publisher_port())
                   << "] Update ROUTER";
 
-        std::this_thread::sleep_for(std::chrono::seconds(m_conf.targetUpdate()));
+        std::this_thread::sleep_for(std::chrono::seconds(_conf.target_update()));
     }
 }
 
 
 CentralProxy::~CentralProxy()
 {
-    m_stopUpdates.store(true);
+    _stop_updates.store(true);
 
     LOG(info) << "Destroy central router ";
-    m_matchmaker->unregisterPublisher(std::make_pair(m_publisherAddress, m_feRouterAddress));
-    m_matchmaker->unregisterRouter(m_beRouterAddress);
+    _matchmaker->unregister_publisher(std::make_pair(_publisher_address, _fe_router_address));
+    _matchmaker->unregister_router(_be_router_address);
 }
 
 
-void CentralProxy::pollForMessages()
+void CentralProxy::poll_for_messages()
 {
     //  Initialize poll set
     zmq::pollitem_t items [] = {
-        { static_cast<void *>(m_feRouter), 0, ZMQ_POLLIN, 0 },
-        { static_cast<void *>(m_beRouter), 0, ZMQ_POLLIN, 0 }
+        { static_cast<void *>(_fe_router), 0, ZMQ_POLLIN, 0 },
+        { static_cast<void *>(_be_router), 0, ZMQ_POLLIN, 0 }
     };
     //  Process messages from both sockets
     while (1) {
         zmq::poll (&items [0], 2, -1);
         if (items [0].revents & ZMQ_POLLIN) {
-            redirectInRequest(m_feRouter, m_beRouter);
+            redirect_in_request(_fe_router, _be_router);
         }
         if (items [1].revents & ZMQ_POLLIN) {
-            redirectInRequest(m_beRouter, m_feRouter);
+            redirect_in_request(_be_router, _fe_router);
         }
     }
 }
 
 
-void CentralProxy::redirectInRequest(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
+void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& socket_be)
 {
-    zmq::message_t replyId;
-    socketFe.recv(&replyId);
+    zmq::message_t reply_id;
+    socket_fe.recv(&reply_id);
 
     zmq::message_t empty;
-    socketFe.recv(&empty);
+    socket_fe.recv(&empty);
 
-    zmq::message_t msgType;
-    socketFe.recv(&msgType);
-    auto messageType = getMessageType(msgType);
+    zmq::message_t msg_type;
+    socket_fe.recv(&msg_type);
+    auto message_type = get_message_type(msg_type);
 
-    zmq::message_t routingKey;
-    socketFe.recv(&routingKey);
+    zmq::message_t routing_key;
+    socket_fe.recv(&routing_key);
 
-    zmq::message_t messageId;
-    socketFe.recv(&messageId);
+    zmq::message_t message_id;
+    socket_fe.recv(&message_id);
 
-    if (isDirect(messageType))
+    if (is_direct(message_type))
     {
         LOG(debug) << "Dispatching "
-                   << toString(messageType)
+                   << to_string(message_type)
                    << " message "
-                   << getString(messageId)
+                   << get_string(message_id)
                    << " - from "
-                   << getString(replyId)
+                   << get_string(reply_id)
                    << " to -> "
-                   << getString(routingKey);
+                   << get_string(routing_key);
 
-        socketBe.send(routingKey, ZMQ_SNDMORE);
-        sendString(socketBe, EMPTY, ZMQ_SNDMORE);
-        socketBe.send(replyId, ZMQ_SNDMORE);
-        socketBe.send(msgType, ZMQ_SNDMORE);
-        socketBe.send(messageId, ZMQ_SNDMORE);
-        dispatchMessageTail(socketFe, socketBe);
+        socket_be.send(routing_key, ZMQ_SNDMORE);
+        send_string(socket_be, EMPTY, ZMQ_SNDMORE);
+        socket_be.send(reply_id, ZMQ_SNDMORE);
+        socket_be.send(msg_type, ZMQ_SNDMORE);
+        socket_be.send(message_id, ZMQ_SNDMORE);
+        dispatch_message_tail(socket_fe, socket_be);
     }
-    else if (isMultisend(messageType))
+    else if (is_multisend(message_type))
     {
         LOG(debug) << "Publishing message "
-                   << getString(messageId)
-                   << " on [" << getString(routingKey) << "]";
+                   << get_string(message_id)
+                   << " on [" << get_string(routing_key) << "]";
 
-        m_publisher.send(routingKey, ZMQ_SNDMORE);
-        m_publisher.send(messageId, ZMQ_SNDMORE);
-        dispatchMessageTail(socketFe, m_publisher);
+        _publisher.send(routing_key, ZMQ_SNDMORE);
+        _publisher.send(message_id, ZMQ_SNDMORE);
+        dispatch_message_tail(socket_fe, _publisher);
     }
 }
 
 
-void CentralProxy::dispatchMessageTail(zmq::socket_t& socketFe, zmq::socket_t& socketBe)
+void CentralProxy::dispatch_message_tail(zmq::socket_t& socket_fe, zmq::socket_t& socket_be)
 {
     bool more = true;
     zmq::message_t msg;
     while (more)
     {
-        socketFe.recv(&msg);
+        socket_fe.recv(&msg);
         more = msg.more();
-        socketBe.send(msg, more ? ZMQ_SNDMORE : 0);
+        socket_be.send(msg, more ? ZMQ_SNDMORE : 0);
     }
 }

@@ -37,14 +37,14 @@ namespace zmqproxy
 
         static std::shared_ptr<Matchmaker> create(const Configuration& config);
 
-        virtual void registerPublisher(const PublisherAddressT& host) = 0;
-        virtual void unregisterPublisher(const PublisherAddressT& host) = 0;
+        virtual void register_publisher(const PublisherAddressT& host) = 0;
+        virtual void unregister_publisher(const PublisherAddressT& host) = 0;
 
-        virtual void registerRouter(const std::string& hostname) = 0;
-        virtual void unregisterRouter(const std::string& hostname) = 0;
+        virtual void register_router(const std::string& hostname) = 0;
+        virtual void unregister_router(const std::string& hostname) = 0;
 
-        virtual std::list<PublisherAddressT> getPublishers() const = 0;
-        virtual std::list<std::string> getRouters() const = 0;
+        virtual std::list<PublisherAddressT> get_publishers() const = 0;
+        virtual std::list<std::string> get_routers() const = 0;
 
     };
 }

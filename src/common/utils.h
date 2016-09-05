@@ -26,14 +26,14 @@
 namespace zmqproxy
 {
 
-    std::string getString(const zmq::message_t& part);
-    int getInteger(const zmq::message_t& part);
-    MessageType getMessageType(const zmq::message_t& part);
-    std::string toString(MessageType msgType);
-    bool isMultisend(MessageType msgType);
-    bool isDirect(MessageType msgType);
+    std::string get_string(const zmq::message_t& part);
+    int get_integer(const zmq::message_t& part);
+    MessageType get_message_type(const zmq::message_t& part);
+    std::string to_string(MessageType msgType);
+    bool is_multisend(MessageType msgType);
+    bool is_direct(MessageType msgType);
 
-    void sendString(zmq::socket_t& socket, const std::string& string, int flags = 0);
+    void send_string(zmq::socket_t& socket, const std::string& string, int flags = 0);
 
 }
 

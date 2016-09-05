@@ -22,7 +22,7 @@ namespace zmqproxy
 {
 
 
-std::string toString(MessageType msgType)
+std::string to_string(MessageType msgType)
 {
     switch(msgType)
     {
@@ -46,32 +46,32 @@ std::string toString(MessageType msgType)
 }
 
 
-std::string getString(const zmq::message_t& part)
+std::string get_string(const zmq::message_t& part)
 {
     return std::string(static_cast<const char*>(part.data()), part.size());
 }
 
 
-int getInteger(const zmq::message_t& part)
+int get_integer(const zmq::message_t& part)
 {
-    return atoi(getString(part).c_str());
+    return atoi(get_string(part).c_str());
 }
 
 
-MessageType getMessageType(const zmq::message_t& part)
+MessageType get_message_type(const zmq::message_t& part)
 {
-    return static_cast<MessageType>(getInteger(part));
+    return static_cast<MessageType>(get_integer(part));
 }
 
 
-bool isMultisend(MessageType msgType)
+bool is_multisend(MessageType msgType)
 {
     return msgType == MessageType::Fanout
             || msgType == MessageType::Notify;
 }
 
 
-bool isDirect(MessageType msgType)
+bool is_direct(MessageType msgType)
 {
     return msgType == MessageType::Call
             || msgType == MessageType::Cast
@@ -80,7 +80,7 @@ bool isDirect(MessageType msgType)
 }
 
 
-void sendString(zmq::socket_t& socket, const std::string& string, int flags)
+void send_string(zmq::socket_t& socket, const std::string& string, int flags)
 {
     zmq::message_t message(string.size());
     memcpy (message.data(), string.data(), string.size());
