@@ -63,9 +63,7 @@ set(INCLUDE_DIR_CPPZMQ ${source_dir})
 set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_LOG_DYN_LINK)
 
-if (APPLE)
-    add_definitions(-DBOOST_LOG_NO_THREADS)
-endif()
+add_definitions(-DBOOST_LOG_NO_THREADS)
 
 find_package(Boost COMPONENTS program_options log REQUIRED)
 
