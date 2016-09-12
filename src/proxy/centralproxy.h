@@ -55,6 +55,11 @@ namespace zmqproxy
         void update_matchmaker();
         void redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& socket_be);
         void dispatch_message_tail(zmq::socket_t& socket_fe, zmq::socket_t& socket_be);
+
+        template <typename FwdIt>
+            void dispatch_message_tail(zmq::socket_t& socket_be, FwdIt begin, FwdIt end);
+
+        std::vector<zmq::message_t> receive_multipart(zmq::socket_t& socket_fe);
     };
 }
 

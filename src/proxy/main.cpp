@@ -76,10 +76,10 @@ int main(int argc, char* argv[])
       ("config-file,c", po::value<std::string>(&configFile),
                 "ZeroMQ proxy configuration file")
 
-      ("frontend-port,fe", po::value<unsigned int>(&frontend_port),
+      ("frontend-port,front", po::value<unsigned int>(&frontend_port),
                 "Frontend ROUTER port. RPC clients connect to frontend")
 
-      ("backend-port,be", po::value<unsigned int>(&backend_port),
+      ("backend-port,back", po::value<unsigned int>(&backend_port),
                 "Backend ROUTER port. RPC servers connect to backend.")
 
       ("publisher-port,pub", po::value<unsigned int>(&publisher_port),

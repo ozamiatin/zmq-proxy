@@ -29,6 +29,12 @@ using namespace zmqproxy;
 
 const std::string EMPTY = "";
 
+const int REPLY_ID_IDX = 0;
+const int EMPTY_IDX = 1;
+const int MESSAGE_TYPE_IDX = 2;
+const int ROUTING_KEY_IDX = 3;
+const int MESSAGE_ID_IDX = 4;
+
 
 CentralProxy::CentralProxy(const Configuration& conf)
     : _conf(conf),
@@ -107,21 +113,18 @@ void CentralProxy::poll_for_messages()
 
 void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& socket_be)
 {
-    zmq::message_t reply_id;
-    socket_fe.recv(&reply_id);
+    auto message = receive_multipart(socket_fe);
 
-    zmq::message_t empty;
-    socket_fe.recv(&empty);
+    if (message.size() < 3)
+    {
+        LOG(error) << "Received message with wrong format! Message skipped ...";
+        return;
+    }
 
-    zmq::message_t msg_type;
-    socket_fe.recv(&msg_type);
-    auto message_type = get_message_type(msg_type);
-
-    zmq::message_t routing_key;
-    socket_fe.recv(&routing_key);
-
-    zmq::message_t message_id;
-    socket_fe.recv(&message_id);
+    auto message_type = get_message_type(message[MESSAGE_TYPE_IDX]);
+    auto& message_id = message[MESSAGE_ID_IDX];
+    auto& reply_id = message[REPLY_ID_IDX];
+    auto& routing_key = message[ROUTING_KEY_IDX];
 
     if (is_direct(message_type))
     {
@@ -137,9 +140,8 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
         socket_be.send(routing_key, ZMQ_SNDMORE);
         send_string(socket_be, EMPTY, ZMQ_SNDMORE);
         socket_be.send(reply_id, ZMQ_SNDMORE);
-        socket_be.send(msg_type, ZMQ_SNDMORE);
-        socket_be.send(message_id, ZMQ_SNDMORE);
-        dispatch_message_tail(socket_fe, socket_be);
+        socket_be.send(message[MESSAGE_TYPE_IDX], ZMQ_SNDMORE);
+        dispatch_message_tail(socket_be, message.begin() + 4, message.end());
     }
     else if (is_multisend(message_type))
     {
@@ -149,8 +151,32 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
 
         _publisher.send(routing_key, ZMQ_SNDMORE);
         _publisher.send(message_id, ZMQ_SNDMORE);
-        dispatch_message_tail(socket_fe, _publisher);
+        dispatch_message_tail(_publisher, message.begin() + 5, message.end());
     }
+}
+
+
+std::vector<zmq::message_t> CentralProxy::receive_multipart(zmq::socket_t& socket_fe)
+{
+    std::vector<zmq::message_t> message;
+    bool more = true;
+    while (more)
+    {
+        message.push_back(zmq::message_t());
+        zmq::message_t& msg = message.back();
+        socket_fe.recv(&msg);
+        more = msg.more();
+    }
+    return message;
+}
+
+
+template <typename FwdIt>
+void CentralProxy::dispatch_message_tail(zmq::socket_t& socket_be, FwdIt begin, FwdIt end)
+{
+    std::for_each(begin, end, [&](zmq::message_t& msg){
+        socket_be.send(msg, msg.more() ? ZMQ_SNDMORE : 0);
+    });
 }
 
 
