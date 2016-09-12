@@ -141,7 +141,7 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
         send_string(socket_be, EMPTY, ZMQ_SNDMORE);
         socket_be.send(reply_id, ZMQ_SNDMORE);
         socket_be.send(message[MESSAGE_TYPE_IDX], ZMQ_SNDMORE);
-        dispatch_message_tail(socket_be, message.begin() + 4, message.end());
+        dispatch_message_tail(socket_be, message.begin() + MESSAGE_ID_IDX, message.end());
     }
     else if (is_multisend(message_type))
     {
@@ -150,8 +150,7 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
                    << " on [" << get_string(routing_key) << "]";
 
         _publisher.send(routing_key, ZMQ_SNDMORE);
-        _publisher.send(message_id, ZMQ_SNDMORE);
-        dispatch_message_tail(_publisher, message.begin() + 5, message.end());
+        dispatch_message_tail(_publisher, message.begin() + MESSAGE_ID_IDX, message.end());
     }
 }
 
@@ -177,17 +176,4 @@ void CentralProxy::dispatch_message_tail(zmq::socket_t& socket_be, FwdIt begin, 
     std::for_each(begin, end, [&](zmq::message_t& msg){
         socket_be.send(msg, msg.more() ? ZMQ_SNDMORE : 0);
     });
-}
-
-
-void CentralProxy::dispatch_message_tail(zmq::socket_t& socket_fe, zmq::socket_t& socket_be)
-{
-    bool more = true;
-    zmq::message_t msg;
-    while (more)
-    {
-        socket_fe.recv(&msg);
-        more = msg.more();
-        socket_be.send(msg, more ? ZMQ_SNDMORE : 0);
-    }
 }
