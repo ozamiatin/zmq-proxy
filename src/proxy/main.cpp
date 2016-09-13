@@ -122,6 +122,8 @@ int main(int argc, char* argv[])
         if (publisher_port)
             config.set_publisher_port(publisher_port);
 
+        LOG(debug) << "Before CentralProxy created";
+
         zmqproxy::CentralProxy proxy(config);
 
         while (true)

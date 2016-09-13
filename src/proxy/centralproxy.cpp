@@ -57,6 +57,7 @@ CentralProxy::CentralProxy(const Configuration& conf)
     _publisher.bind("tcp://*:" + std::to_string(conf.get_publisher_port()));
 
     _stop_updates.store(false);
+    LOG(debug) << "Before updater created";
     _matchmaker_updater.reset(new std::thread(&CentralProxy::update_matchmaker, this));
 
     LOG(debug) << "Updater created";
