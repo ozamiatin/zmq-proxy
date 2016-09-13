@@ -90,6 +90,7 @@ add_dependencies(zmq-proxy zeromq
                            cppzmq)
 
 target_link_libraries(zmq-proxy zmq-static
+                                pthread
                                 ${Boost_LIBRARIES}
                                 boost_program_options
                                 boost_system
