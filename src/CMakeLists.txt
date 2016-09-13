@@ -62,7 +62,7 @@ set(INCLUDE_DIR_CPPZMQ ${source_dir})
 
 #set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_LOG_DYN_LINK)
-add_definitions(-DBOOST_ALL_DYN_LINK)
+#add_definitions(-DBOOST_ALL_DYN_LINK)
 #add_definitions(-DBOOST_LOG_NO_THREADS)
 
 find_package(Boost COMPONENTS program_options log REQUIRED)
@@ -95,5 +95,4 @@ target_link_libraries(zmq-proxy pthread
                                 boost_program_options
                                 boost_system
                                 boost_log
-                                boost_thread-mt
                                 cpp_redis)
