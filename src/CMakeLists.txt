@@ -15,9 +15,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -W -Wall -Wextra -O3 -pthread
 project(zmq_proxy)
 
 
-if (CMAKE_BUILD_TYPE MATCHES Debug)
-    add_definitions(-DDEBUG)
-endif()
+add_definitions(-DUSE_EASYLOGGING_)
 
 
 include(ExternalProject)
@@ -34,6 +32,17 @@ ExternalProject_Get_Property(zeromq binary_dir)
 message(STATUS "ZEROMQ INSTALL DIR: " ${binary_dir}/install/include)
 include_directories(${binary_dir}/install/include)
 link_directories(${binary_dir}/install/lib)
+
+
+ExternalProject_Add(easyloggingpp
+    PREFIX 3rd-party
+    GIT_REPOSITORY "https://github.com/easylogging/easyloggingpp.git"
+    CONFIGURE_COMMAND ""
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    LOG_DOWNLOAD ON)
+ExternalProject_Get_Property(easyloggingpp source_dir)
+set(INCLUDE_DIR_EASYLOGGINGPP ${source_dir}/src)
 
 
 ExternalProject_Add(cpp-redis
@@ -71,10 +80,12 @@ find_package(Boost COMPONENTS program_options log REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 include_directories(${INCLUDE_DIR_CPPZMQ})
 include_directories(${INCLUDE_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/src)
-
+include_directories(${INCLUDE_DIR_EASYLOGGINGPP})
 
 set(HEADER_FILES "common/matchmaker.h"
-                 "common/names.h")
+                 "common/names.h"
+                 "logging/logging.h"
+                 "logging/logging_init.h")
 
 set(SOURCE_FILES "common/configuration.cpp"
                  "common/matchmaker.cpp"
@@ -88,7 +99,8 @@ add_executable(zmq-proxy ${HEADER_FILES} ${SOURCE_FILES})
 
 add_dependencies(zmq-proxy zeromq
                            cpp-redis
-                           cppzmq)
+                           cppzmq
+                           easyloggingpp)
 
 target_link_libraries(zmq-proxy zmq-static
                                 pthread

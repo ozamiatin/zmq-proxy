@@ -19,6 +19,7 @@
 
 #include "configuration.h"
 #include "names.h"
+#include "logging/logging.h"
 
 #include <sstream>
 

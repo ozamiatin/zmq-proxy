@@ -19,6 +19,7 @@
 
 #include <zmq_addon.hpp>
 
+#include "logging/logging.h"
 #include "common/configuration.h"
 #include "common/matchmaker.h"
 #include "common/utils.h"

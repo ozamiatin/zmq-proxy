@@ -24,6 +24,7 @@
 #include <boost/log/trivial.hpp>
 #include <boost/log/expressions.hpp>
 
+#include "logging/logging_init.h"
 #include "centralproxy.h"
 #include "common/configuration.h"
 #include "common/matchmaker_redis.h"
@@ -62,23 +63,10 @@ void init_signal_handling()
 }
 
 
-void init_logging()
-{
-    boost::log::core::get()->set_filter
-    (
-#ifdef DEBUG
-        boost::log::trivial::severity >= boost::log::trivial::debug
-#else
-        boost::log::trivial::severity >= boost::log::trivial::debug
-#endif
-    );
-}
-
-
 int main(int argc, char* argv[])
 {
     init_signal_handling();
-    init_logging();
+    init_logging(argc, argv);
 
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
