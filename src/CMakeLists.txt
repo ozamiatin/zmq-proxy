@@ -60,7 +60,7 @@ ExternalProject_Get_Property(cppzmq source_dir)
 set(INCLUDE_DIR_CPPZMQ ${source_dir})
 
 
-set(Boost_USE_STATIC_LIBS ON)
+#set(Boost_USE_STATIC_LIBS ON)
 add_definitions(-DBOOST_LOG_DYN_LINK)
 add_definitions(-DBOOST_ALL_DYN_LINK)
 add_definitions(-DBOOST_LOG_NO_THREADS)
