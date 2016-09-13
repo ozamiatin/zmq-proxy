@@ -33,6 +33,12 @@ MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
     LOG(info) << "Connecting to redis: "
               << "Host: " << conf.redis_host() << " "
               << "Port: " << conf.redis_port();
+
+
+    _redis.set_disconnection_handler([] (cpp_redis::redis_client&) {
+        LOG(debug) << "Redis disconnected!";
+    });
+
     _redis.connect(conf.redis_host(), conf.redis_port());
 
     LOG(debug) << "After redis connected";
