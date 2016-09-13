@@ -126,6 +126,7 @@ int main(int argc, char* argv[])
 
         while (true)
         {
+            LOG(info) << "Poll in main ...";
             proxy.poll_for_messages();
             if( quit )
                 // exit normally after SIGINT
