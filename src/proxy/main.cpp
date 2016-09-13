@@ -78,7 +78,7 @@ void init_logging()
 int main(int argc, char* argv[])
 {
     init_signal_handling();
-    init_logging();
+    //init_logging();
 
     namespace po = boost::program_options;
     po::options_description desc("ZeroMQ proxy service");
