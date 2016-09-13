@@ -33,6 +33,7 @@ MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
               << "Host: " << conf.redis_host() << " "
               << "Port: " << conf.redis_port();
     _redis.connect(conf.redis_host(), conf.redis_port());
+    LOG(debug) << "After redis connected";
 }
 
 

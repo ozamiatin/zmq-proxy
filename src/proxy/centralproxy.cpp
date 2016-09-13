@@ -58,11 +58,14 @@ CentralProxy::CentralProxy(const Configuration& conf)
 
     _stop_updates.store(false);
     _matchmaker_updater.reset(new std::thread(&CentralProxy::update_matchmaker, this));
+
+    LOG(debug) << "Updater created";
 }
 
 
 void CentralProxy::update_matchmaker()
 {
+    LOG(debug) << "Entered update_matchmaker first time!";
     while (!_stop_updates)
     {
         _matchmaker->register_publisher(std::make_pair(_publisher_address, _fe_router_address));
@@ -93,6 +96,8 @@ CentralProxy::~CentralProxy()
 
 void CentralProxy::poll_for_messages()
 {
+    LOG(debug) << "Poll for messages";
+
     //  Initialize poll set
     zmq::pollitem_t items [] = {
         { static_cast<void *>(_fe_router), 0, ZMQ_POLLIN, 0 },
