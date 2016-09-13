@@ -95,4 +95,5 @@ target_link_libraries(zmq-proxy pthread
                                 boost_program_options
                                 boost_system
                                 boost_log
+                                boost_thread-mt
                                 cpp_redis)
