@@ -58,10 +58,7 @@ CentralProxy::CentralProxy(const Configuration& conf)
     _publisher.bind("tcp://*:" + std::to_string(conf.get_publisher_port()));
 
     _stop_updates.store(false);
-    LOG(debug) << "Before updater created";
     _matchmaker_updater.reset(new std::thread(&CentralProxy::update_matchmaker, this));
-
-    LOG(debug) << "Updater created";
 }
 
 
@@ -98,8 +95,6 @@ CentralProxy::~CentralProxy()
 
 void CentralProxy::poll_for_messages()
 {
-    LOG(debug) << "Poll for messages";
-
     //  Initialize poll set
     zmq::pollitem_t items [] = {
         { static_cast<void *>(_fe_router), 0, ZMQ_POLLIN, 0 },
@@ -133,8 +128,9 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
     auto& reply_id = message[REPLY_ID_IDX];
     auto& routing_key = message[ROUTING_KEY_IDX];
 
-    if (is_direct(message_type))
+    if (is_direct(message_type) || !_conf.use_pub_sub())
     {
+#ifndef NDEBUG
         LOG(debug) << "Dispatching "
                    << to_string(message_type)
                    << " message "
@@ -143,6 +139,7 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
                    << get_string(reply_id)
                    << " to -> "
                    << get_string(routing_key);
+#endif
 
         socket_be.send(routing_key, ZMQ_SNDMORE);
         send_string(socket_be, EMPTY, ZMQ_SNDMORE);
@@ -152,9 +149,11 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
     }
     else if (is_multisend(message_type))
     {
+#ifndef NDEBUG
         LOG(debug) << "Publishing message "
                    << get_string(message_id)
                    << " on [" << get_string(routing_key) << "]";
+#endif
 
         _publisher.send(routing_key, ZMQ_SNDMORE);
         dispatch_message_tail(_publisher, message.begin() + MESSAGE_ID_IDX, message.end());

@@ -76,18 +76,18 @@ int main(int argc, char* argv[])
     unsigned int publisher_port = 0;
 
     desc.add_options()
-      ("help,h", "Show help")
+        ("help,h", "Show help")
 
-      ("config-file,c", po::value<std::string>(&configFile),
+        ("config-file,c", po::value<std::string>(&configFile),
                 "ZeroMQ proxy configuration file")
 
-      ("frontend-port,front", po::value<unsigned int>(&frontend_port),
+        ("frontend-port,front", po::value<unsigned int>(&frontend_port),
                 "Frontend ROUTER port. RPC clients connect to frontend")
 
-      ("backend-port,back", po::value<unsigned int>(&backend_port),
+        ("backend-port,back", po::value<unsigned int>(&backend_port),
                 "Backend ROUTER port. RPC servers connect to backend.")
 
-      ("publisher-port,pub", po::value<unsigned int>(&publisher_port),
+        ("publisher-port,pub", po::value<unsigned int>(&publisher_port),
                 "Publisher port. Fanout messages go over this port if pub/sub is used.");
 
     po::variables_map vm;
@@ -110,13 +110,10 @@ int main(int argc, char* argv[])
         if (publisher_port)
             config.set_publisher_port(publisher_port);
 
-        LOG(debug) << "Before CentralProxy created";
-
         zmqproxy::CentralProxy proxy(config);
 
         while (true)
         {
-            LOG(info) << "Poll in main ...";
             proxy.poll_for_messages();
             if( quit )
                 // exit normally after SIGINT

@@ -46,10 +46,10 @@ Configuration::Configuration(const std::string& config_file)
             boost::property_tree::ptree conf;
             boost::property_tree::ini_parser::read_ini(config_file, conf);
 
-            _use_pub_sub = conf.get<bool>("DEFAULT.use_pub_sub", _use_pub_sub);
-            _target_expire = conf.get<int>("DEFAULT.zmq_target_expire", _target_expire);
-            _target_update = conf.get<int>("DEFAULT.zmq_target_update", _target_update);
-            _host = conf.get<std::string>("DEFAULT.rpc_zmq_host", _host);
+            _use_pub_sub = conf.get<bool>("oslo_messaging_zmq.use_pub_sub", _use_pub_sub);
+            _target_expire = conf.get<int>("oslo_messaging_zmq.zmq_target_expire", _target_expire);
+            _target_update = conf.get<int>("oslo_messaging_zmq.zmq_target_update", _target_update);
+            _host = conf.get<std::string>("oslo_messaging_zmq.rpc_zmq_host", _host);
 
             _redis_host = conf.get<std::string>("matchmaker_redis.host", _redis_host);
             _redis_port = conf.get<int>("matchmaker_redis.port", _redis_port);
