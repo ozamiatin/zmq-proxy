@@ -29,6 +29,7 @@ using namespace zmqproxy;
 MatchmakerRedis::MatchmakerRedis(const Configuration& conf)
     : _conf(conf)
 {
+    LOG(info) << "BEFORE Connecting to redis: ";
     LOG(info) << "Connecting to redis: "
               << "Host: " << conf.redis_host() << " "
               << "Port: " << conf.redis_port();
