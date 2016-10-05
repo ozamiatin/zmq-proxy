@@ -74,6 +74,7 @@ int main(int argc, char* argv[])
     unsigned int frontend_port = 0;
     unsigned int backend_port = 0;
     unsigned int publisher_port = 0;
+    bool ack_pub_sub = false;
 
     desc.add_options()
         ("help,h", "Show help")
@@ -88,7 +89,10 @@ int main(int argc, char* argv[])
                 "Backend ROUTER port. RPC servers connect to backend.")
 
         ("publisher-port,pub", po::value<unsigned int>(&publisher_port),
-                "Publisher port. Fanout messages go over this port if pub/sub is used.");
+                "Publisher port. Fanout messages go over this port if PUB/SUB is used.")
+
+        ("ack-pub-sub,ack", po::bool_switch(&ack_pub_sub),
+                "Acknowledge received PUB/SUB messages or not.");
 
     po::variables_map vm;
 
@@ -109,6 +113,9 @@ int main(int argc, char* argv[])
 
         if (publisher_port)
             config.set_publisher_port(publisher_port);
+
+        if (ack_pub_sub)
+            config.set_ack_pub_sub(ack_pub_sub);
 
         zmqproxy::CentralProxy proxy(config);
 

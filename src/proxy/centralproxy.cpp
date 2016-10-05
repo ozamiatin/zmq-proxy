@@ -149,6 +149,25 @@ void CentralProxy::redirect_in_request(zmq::socket_t& socket_fe, zmq::socket_t& 
     }
     else if (is_multisend(message_type))
     {
+        if (_conf.use_pub_sub() && _conf.get_ack_pub_sub())
+        {
+#ifndef NDEBUG
+            LOG(debug) << "Sending "
+                       << to_string(MessageType::Ack)
+                       << " message for "
+                       << get_string(message_id)
+                       << " to "
+                       << get_string(reply_id);
+#endif
+
+            socket_fe.send(reply_id, ZMQ_SNDMORE);
+            send_string(socket_fe, EMPTY, ZMQ_SNDMORE);
+            send_string(socket_fe, "zmq-proxy", ZMQ_SNDMORE);
+            send_string(socket_fe, std::to_string(static_cast<int>(MessageType::Ack)), ZMQ_SNDMORE);
+            // Send a string copy of message_id, because it shouldn't be cleared now
+            send_string(socket_fe, get_string(message_id));
+        }
+        
 #ifndef NDEBUG
         LOG(debug) << "Publishing message "
                    << get_string(message_id)

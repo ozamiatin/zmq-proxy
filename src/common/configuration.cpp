@@ -37,7 +37,8 @@ Configuration::Configuration(const std::string& config_file)
       _sentinel_socket_timeout(10000),
       _frontend_port(0),
       _backend_port(0),
-      _publisher_port(0)
+      _publisher_port(0),
+      _ack_pub_sub(false)
 {
     if (!config_file.empty())
     {
@@ -161,6 +162,12 @@ void Configuration::set_publisher_port(unsigned int port)
 }
 
 
+void Configuration::set_ack_pub_sub(bool ack)
+{
+    _ack_pub_sub = ack;
+}
+
+
 unsigned int Configuration::get_frontend_port() const
 {
     return _frontend_port;
@@ -176,4 +183,10 @@ unsigned int Configuration::get_backend_port() const
 unsigned int Configuration::get_publisher_port() const
 {
     return _publisher_port;
+}
+
+
+bool Configuration::get_ack_pub_sub() const
+{
+    return _ack_pub_sub;
 }
