@@ -45,6 +45,8 @@ namespace zmqproxy
         unsigned int _backend_port;
         unsigned int _publisher_port;
 
+        bool _ack_pub_sub;
+
     public:
         Configuration(const std::string& config_file);
         bool use_pub_sub() const;
@@ -66,9 +68,13 @@ namespace zmqproxy
         void set_backend_port(unsigned int port);
         void set_publisher_port(unsigned int port);
 
+        void set_ack_pub_sub(bool ack);
+
         unsigned int get_frontend_port() const;
         unsigned int get_backend_port() const;
         unsigned int get_publisher_port() const;
+
+        bool get_ack_pub_sub() const;
     };
 }
 
