@@ -1,0 +1,6 @@
+sudo: required
+dist: trusty
+language: cpp
+
+install: ./install_deps_ubuntu.sh
+script: ./build
